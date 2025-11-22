@@ -1,0 +1,57 @@
+---
+title: "Ethereum Dencun upgrade and token bridging"
+publishDate: "13 Oct 2024"
+description: "My story about how I tried to bridge ETH on zkSync to Ethereum network"
+tags: ["programming", "blockchain", "bridging"]
+ogImage: "/blog-images/cloudinary/bridge.png"
+---
+
+![bridge](/blog-images/cloudinary/bridge.png)
+
+For the past year, I kept hearing about bridging in blockchain but never really tried it. My acceptance to ETHGlobalSF gave me a chance to do so for the first time.
+
+So, after some research, I zeroed in on [Bungee Exchange](https://www.bungee.exchange/) mainly for their simple UX and specifically for the Refuel.
+
+## Wait, what is bridging? I only know swapping
+
+In the crypto world, tokens are the currencies of a network, but every network supports different tokens. i.e Ethereum network’s native currency aka token is ETH but there are other tokens on Ethereum like USDC, Tether, BNB, TRON, TON etc.
+
+Now, assume you have 1 ETH on Ethereum network and want to exchange it for TRON in the same network. Then all you have to do is swap ETH for TRON on ethereum. This would be fairly simple and can be done on platforms like Uniswap, SushiSwap etc.
+
+But when it comes to exchanging ETH or any token on ethereum for any token on a different network (let’s consider zkSync here), we have to use bridges.
+
+> **TL;DR**: Swapping is for exchanging tokens within a network, Bridging is for exchanging token between networks.
+
+## What is Refuel, what difference does it make in bridging?
+
+We saw how bridging is different from swapping, now the problem in bridging is, we need native token on both the networks (chains) in most cases depending on the chains involved.
+
+I transferred tokens from Base to Polygon, (even the other way works similarly) and did not have enough token to pay for the gas fees, enabling the refuel option airdroped the necessary token to my address.
+
+I paid extra POL tokens (6 POL) and the equivalent ETH (0.0003 ETH) got transferred to my account.
+
+![txn](/blog-images/cloudinary/txn.png)
+
+What happened actually is that, I consented to transfer 13 POL (7 + 6 for refueling) to Socket Gateway protocol (on Polygon Network) and the POL token that I paid for refueling is swapped for WETH (Wrapped ETH), which is an ERC-20 token representing Ether on the Polygon network and was facilitated by a protocol.
+
+This transaction utilized an exchange proxy or a flash wallet, which is common in DeFi operations to facilitate complex transactions involving multiple steps, such as swapping tokens across different liquidity pools.
+
+Then, an internal transaction (details are not stored on-chain) happens where my wallet address gets 0.0009 ETH for the 6 POL I gave.
+
+> **Note**: Read about Internal transactions [here](https://www.alchemy.com/docs/what-are-internal-transactions).
+
+## Overview of the entire Bridging process
+
+Step 1: I pay 13 POL in total to Socket Gateway of which 6 gets converted to 0.0009 ETH and is sent to my wallet (for paying gas on Base) as an internal transaction via Socket Refuel. This was used as Bridge fee.
+
+Step 2: The remaining 7 POL is transferred to Exchange Proxy, and then is converted to 0.0011 WETH via Exchange Proxy Flash Wallet and sent to Across Protocol (which will do the bridging).
+
+Step 3: Across Protocol then takes the WETH and transfers equivalent ETH to my wallet address.
+
+**[Check here for the transaction details](https://www.socketscan.io/tx/0xf12c54eef962d7edc4b9e98fb6b77d482e8fbd87e701039db28ce40c69036a02)**
+
+## Conclusion
+
+After the Ethereum Dencun upgrade, the transaction fees on L2s as I only paid $0.003704 on Base.
+
+But the transaction fee on Ethereum is still significant as I spent about $3. It could also be because in the first case, I bridged between two L2s while in the second case it was between an L1 and L2.

@@ -1,11 +1,11 @@
 ---
 import PageLayout from "@/layouts/Base";
 import { Image } from "astro:assets";
-import aboutImg from "../assets/pfp.png";
+import aboutImg from "../assets/pfp.jpg";
 
 const meta = {
 	title: "About",
-	description: "More about Steve Simkins",
+	description: "More about Babuaravind Gururaj",
 };
 ---
 
@@ -13,70 +13,49 @@ const meta = {
   <div class="space-y-6">
     <h1 class="title">About</h1>
     <p>
-      Hey there! My name is Steve and I’m a DX Engineer with a passion for developer tooling that advances cypherpunk values, such as privacy, decentralization, and self-sovereignty.
+      Hey there! I am Babu and I’m a DevEx Engineer with a love for developer tooling that reduces repetition and simplifies development.
       I’m currently working at
       <a
         class="style-link inline-block"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="openzeppelin"
-        href="https://openzeppelin.com"
+        aria-label="Uniswap Foundation"
+        href="https://uniswapfoundation.org"
       >
-        OpenZeppelin</a
+        Uniswap Foundation</a
       >
       as a DevRel, where I work on anything from writing documentation, building
-      developer tools, to writing blog posts, and filming videos. I'm also working
-      on <a
-        class="style-link inline-block"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Orbiter"
-        href="https://orbiter.host">Orbiter</a
-      >, a new approach and open approach to app hosting. Along side Orbiter I'm
-      also building a new stack called <a
-        class="style-link inline-block"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="bhvr"
-        href="https://bhvr.dev">bhvr</a
-      > (Bun Hono Vite React) which is designed to be portable and deployable anywhere
-      to avoid walled garden providers.
+      developer tools, to writing blog posts, and filming videos. 
     </p>
     <p>
-      My greatest desire is to help build technologies that empower people who
-      would otherwise be powerless, whether it's financial systems, information
-      privacy, or democratizing software.
+      I have a dream to build systems that empower people to build their own tools and also a sustainable forest one day.
     </p>
     <div class="flex justify-center">
       <Image
         src={aboutImg}
-        alt="Steve pfp"
+        alt="Babuaravind pfp"
         loading="eager"
         class="animate-fade-in"
       />
     </div>
-    <p>Here's some more info about me:</p>
+    <p>Here's a little more info about me:</p>
     <ul class="list-inside list-disc">
-      <li>Currently in Chattanooga TN</li>
+      <li>Currently in Boston MA</li>
       <li>
-        Pastimes include enjoying coffee shops, spending time with my wife and
-        two sons, and tinkering with mechanical keyboards
+        Favorite pastimes include exploring coffee shops, supporting Arsenal and walking a lot.
       </li>
-      <li>
-        Taught myself web development which has led to a love and appreciation
-        for developer tools
-      </li>
-      <li>I have a killer waffle recipe handed down through my family</li>
+      <li>I have a thing for making desserts and am surprisingly decent at it. </li>
+	  <li>Oh and I am open to opportunities!</li>
     </ul>
     <p>
       Feel free to
-      <button
+      <a
         class="style-link inline-block"
-        onclick="window.location.href='mailto:contact@stevedylan.dev'"
+        href="mailto:babuaravindgururaj@gmail.com"
         aria-label="github repository"
       >
         reach out
-      </button>!
+	</a>!
     </p>
   </div>
 </PageLayout>

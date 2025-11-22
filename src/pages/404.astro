@@ -1,17 +1,13 @@
 ---
 import PageLayout from "@/layouts/Base";
-import { Image } from "astro:assets";
 
 const meta = {
+	description: "Ah shoot, looks like you got lost in space!",
 	title: "Oops! You found a missing page!",
-	description: "Oops! It looks like this page is lost in space!",
 };
 ---
 
 <PageLayout meta={meta}>
-	<h1 class="title mb-6">404 | Oops something went wrong</h1>
-	<p class="mb-8">Please use the navigation to find your way back</p>
-	<div class="my-4 grid justify-center">
-		<Image src="/512x512.png" width={256} height={256} alt="logo" loading="eager" />
-	</div>
+	<h1 class="title mb-12">Ah shoot, looks like you got lost in space!</h1>
+	<p class="mb-8">Don't worry, let me help you get home.</p>
 </PageLayout>
