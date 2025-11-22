@@ -1,7 +1,1 @@
-<div align="center">
-  <img alt="stevedylandevlogo" src="./public/512x512.png" width="70" />
-</div>
-
-</br>
-
-My personal website based off the amazing [astro-cactus-template](https://github.com/chrismwilliams/astro-theme-cactus) with my own special touches.
+My personal website based off the legend [Steve Simkins's](https://github.com/stevedylan/stevedylan.dev) work.

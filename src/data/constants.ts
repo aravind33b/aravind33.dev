@@ -15,29 +15,20 @@ export const MENU_LINKS = [
 		title: "Projects",
 		path: "/projects",
 	},
-	{
-		title: "Videos",
-		path: "/videos",
-	},
-	{
-		title: "Photos",
-		path: "https://steve.photo",
-	},
 ];
 
 // ! Remember to add your own socials
 export const SOCIAL_LINKS = {
-	github: "https://github.com/stevedylandev",
-	twitter: "https://twitter.com/stevedylandev",
-	telegram: "https://telegram.me/stevedylandev",
-	medium: "https://medium.com/@stevedylandev",
-	linkedin: "https://www.linkedin.com/in/steve-simkins/",
-	photos: "https://steve.photo",
+	github: "https://github.com/aravind33b",
+	twitter: "https://x.com/aravind33b",
+	telegram: "https://telegram.me/aravind33b",
+	medium: "https://medium.com/@aravind33b",
+	linkedin: "https://www.linkedin.com/in/babuaravind-gururaj/",
+	photos: "/",
 	website: "/",
-	coffee: "https://buymeacoffee.com/stevedylandev",
-	orbiter: "https://orbiter.host",
-	ethereum: "https://app.ens.domains/stevedylandev.eth",
-	email: "mailto:contact@stevedylan.dev",
-	rss: "https://stevedylan.dev/rss.xml",
-	pgp: "https://stevedylan.dev/public_key.asc",
+	farcaster: "https://farcaster.xyz/aravind33",
+	ethereum: "https://app.ens.domains/aravind33.eth",
+	email: "mailto:babuaravindgururaj@gmail.com",
+	rss: "https://aravind33b.dev/rss.xml",
+	pgp: "https://aravind33b.dev/public_key.asc",
 };
