@@ -1,1 +1,1 @@
-My personal website based off the legend [Steve Simkins's](https://github.com/stevedylan/stevedylan.dev) work.
+My personal website based off the legend [Steve Simkins's](https://github.com/stevedylandev/stevedylan.dev) work.
