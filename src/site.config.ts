@@ -1,6 +1,6 @@
 const siteMeta = {
 	author: "Babuaravind Gururaj",
-	title: "Babuaravind Gururajs",
+	title: "Babuaravind Gururaj",
 	description: "DevEx Engineer | Software Engineer",
 	lang: "en-GB",
 	ogLocale: "en_GB",
