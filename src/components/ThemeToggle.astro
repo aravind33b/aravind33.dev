@@ -1,37 +1,49 @@
 <script>
-	class ThemeToggle extends HTMLElement {
-		constructor() {
-			super();
-			const button = this.querySelector("button") as HTMLButtonElement;
+  class ThemeToggle extends HTMLElement {
+    constructor() {
+      super();
+    }
 
-			function setTheme(dark: boolean) {
-				// This could/should be a CustomEvent()
-				document.documentElement.classList.toggle("dark", dark);
-				// set the aria-pressed attribute, dark mode === aria-pressed=true
-				button.setAttribute("aria-pressed", String(dark));
-			}
+    connectedCallback() {
+      const button = this.querySelector("button");
+      if (!button) return;
 
-			// button clicked, toggle dark mode
-			button.addEventListener("click", () => setTheme(!this.isDark()));
+      const setTheme = (dark: boolean) => {
+        document.documentElement.classList.toggle("dark", dark);
+        button.setAttribute("aria-pressed", String(dark));
+        window.sessionStorage.setItem("theme", dark ? "dark" : "light");
+      };
 
-			// Initalise button state
-			setTheme(this.isDark());
-		}
+      const getInitialTheme = () => {
+        const stored = window.sessionStorage.getItem("theme");
+        if (stored === "dark") return true;
+        if (stored === "light") return false;
 
-		// returns if the root element contains the dark class
-		isDark() {
-			return document.documentElement.classList.contains("dark");
-		}
-	}
+        // existing behavior: fall back to system preference
+        return (
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+        );
+      };
 
-	customElements.define("theme-toggle", ThemeToggle);
+      // flip current mode
+      button.addEventListener("click", () =>
+        setTheme(!document.documentElement.classList.contains("dark")),
+      );
+
+      // initial state: stored value or system default
+      setTheme(getInitialTheme());
+    }
+  }
+
+  customElements.define("theme-toggle", ThemeToggle);
 </script>
 
 <theme-toggle class="ml-auto">
 	<button
 		type="button"
 		id="toggle-theme"
-		class="group relative h-9 w-9 rounded-md bg-[#ECE0BB] p-2 ring-zinc-400 transition-all hover:ring-2 dark:bg-[#282828]"
+		class="group relative h-9 w-9 rounded-md  p-2 ring-zinc-400 transition-all hover:ring-2 "
 		aria-label="Toggle Dark Mode"
 	>
 		<svg

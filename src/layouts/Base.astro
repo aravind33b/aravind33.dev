@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import SkipLink from "@/components/SkipLink";
 import siteConfig from "@/site-config";
 import { ViewTransitions } from "astro:transitions";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Props {
 	meta: SiteMeta;
@@ -19,7 +20,7 @@ const {
 <html lang={siteConfig.lang}>
 	<head>
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#121113" />
+    <meta name="theme-color" content="#f6eee3" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		<!-- Google tag (gtag.js) -->
 		<BaseHead title={title} description={description} ogImage={ogImage} articleDate={articleDate} />
@@ -35,6 +36,7 @@ const {
 	</head>
 	<body>
 		<SkipLink />
+		<ThemeToggle />
 		<Header />
 		<main id="main" class="flex-1">
 			<slot />

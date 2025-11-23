@@ -16,13 +16,14 @@
 @layer base {
 	:root {
 		color-scheme: light;
-		--theme-bg: #121113;
-		--theme-link: #ffffff;
-		--theme-text: #ffffff;
-		--theme-accent: #ffffff;
-		--theme-accent-2: #ffffff;
-		--theme-quote: #ffffff;
+		--theme-bg: #ffffff;
+		--theme-link: #37352F;
+		--theme-text: #37352F;
+		--theme-accent: #37352F;
+		--theme-accent-2: #37352F;
+		--theme-quote: #37352F;
 		--theme-menu-bg: rgb(0, 0, 0 / 0.85);
+		--page-bg: #E9E5E3;
 	}
 
 	:root.dark {
@@ -34,14 +35,15 @@
 		--theme-accent-2: #ffffff;
 		--theme-quote: #ffffff;
 		--theme-menu-bg: rgb(0, 0, 0 / 0.85);
+		--page-bg: #121113;
 	}
 
 	html {
-		@apply h-full scroll-smooth border-t-2 border-textColor bg-[#121113];
+		@apply h-full scroll-smooth border-t-2 border-textColor bg-[var(--page-bg)];
 	}
 
 	html body {
-		@apply mx-auto flex h-full max-w-3xl flex-col bg-[#121113] px-8 pt-16 font-sans text-sm font-normal text-textColor antialiased;
+		@apply mx-auto flex h-full max-w-3xl flex-col bg-[var(--page-bg)] px-8 pt-16 font-sans text-base font-normal text-textColor antialiased;
 	}
 
   ::-webkit-scrollbar {
@@ -49,12 +51,79 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #121113; /* Change this to your desired background color */
+  background: #37352F;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #121113; /* Change this to your desired thumb color */
+  background: #37352F;
   border-radius: 10px
+}
+
+.handdrawn-btn {
+  background: transparent;
+  transition: all 0.5s ease;
+  outline: none;
+  border-radius: 255px 35px 225px 45px/40px 175px 45px 255px;
+  border: 2px solid var(--theme-link);
+  padding: 0.5em;
+}
+
+.home-arrow-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+}
+
+.home-arrow {
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  opacity: 0.9;
+}
+
+.home-arrow--top {
+  top: -1rem;
+  left: 50%;
+  animation: arrow-pop-top 900ms ease-in-out infinite;
+}
+
+.home-arrow--bottom {
+  bottom: -1rem;
+  left: 50%;
+  animation: arrow-pop-bottom 900ms ease-in-out infinite;
+}
+
+.home-arrow--left {
+  left: -1rem;
+  top: 50%;
+  animation: arrow-pop-left 900ms ease-in-out infinite;
+}
+
+.home-arrow--right {
+  right: -1rem;
+  top: 50%;
+  animation: arrow-pop-right 900ms ease-in-out infinite;
+}
+
+@keyframes arrow-pop-top {
+  0%, 100% { transform: translate(-50%, 0) scale(1); }
+  50%      { transform: translate(-50%, -3px) scale(1.1); }
+}
+
+@keyframes arrow-pop-bottom {
+  0%, 100% { transform: translate(-50%, 0) rotate(180deg) scale(1); }
+  50%      { transform: translate(-50%, 3px) rotate(180deg) scale(1.1); }
+}
+
+@keyframes arrow-pop-left {
+  0%, 100% { transform: translate(0, -50%) rotate(-90deg) scale(1); }
+  50%      { transform: translate(3px, -50%) rotate(-90deg) scale(1.1); }
+}
+
+@keyframes arrow-pop-right {
+  0%, 100% { transform: translate(0, -50%) rotate(90deg) scale(1); }
+  50%      { transform: translate(-3px, -50%) rotate(90deg) scale(1.1); }
 }
 
 }
