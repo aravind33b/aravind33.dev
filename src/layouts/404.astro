@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer";
 import SkipLink from "@/components/SkipLink";
 import siteConfig from "@/site-config";
 import { ViewTransitions } from "astro:transitions";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Props {
 	meta: SiteMeta;
@@ -35,8 +36,10 @@ const {
 	</head>
 	<body>
 		<SkipLink />
+		<ThemeToggle />
 		<main id="main" class="flex-1">
 			<slot />
 		</main>
 	</body>
+    <Footer/>
 </html>

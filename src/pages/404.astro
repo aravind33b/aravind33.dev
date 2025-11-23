@@ -3,6 +3,8 @@ import PageLayout from "@/layouts/404";
 import { Image } from "astro:assets";
 import notFound from "../assets/404.jpg";
 import asci from "../assets/ascii-art.png";
+import HomeIcon from '@/components/svgs/HomeIcon';
+import UpArrow from "@/components/svgs/UpArrow";
 
 const meta = {
 	description: "Ah shoot, looks like you got lost in space!",
@@ -12,44 +14,19 @@ const meta = {
 
 <PageLayout meta={meta}>
 	<div class="mt-24 flex flex-col items-center">
-		<h1 class="title mb-12">Ah shoot, looks like you got lost in space!</h1>
+		<h1 class="title mb-12">Ah shoot, looks like you got lost in ocean!</h1>
 		<p class="mb-8">Don't worry, let me help you get
-			<a href="/" class="inline-flex items-center gap-1 border-b border-transparent border-current">
-				home
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 24 24"
-					class="inline-block h-4 w-4 align-middle"
-					aria-hidden="true"
-				>
-					<path
-					d="M4 11.5
-						L12 4
-						L20 11.5
-						V18.5
-						C20 20 19 21 17.5 21
-						H6.5
-						C5 21 4 20 4 18.5
-						Z"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2.4"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					/>
-					<path
-					d="M10 21
-						V16.5
-						A2 2 0 0 1 14 16.5
-						V21"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2.4"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					/>
-				</svg>
-			</a>
+			<span class="home-arrow-wrap">
+				<UpArrow class="home-arrow home-arrow--bottom" />
+				<UpArrow class="home-arrow home-arrow--right" />
+				<UpArrow class="home-arrow home-arrow--top" />
+				<UpArrow class="home-arrow home-arrow--left" />
+
+				<a href="/" class="handdrawn-btn inline-flex items-center gap-1">
+					home
+					<HomeIcon class="inline-block h-4 w-4 align-middle"/>
+				</a>
+			</span>
 		</p>
 	</div>
 	<div class="flex justify-center ">
