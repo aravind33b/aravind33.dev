@@ -5,6 +5,7 @@ import PostPreview from "@/components/blog/PostPreview";
 import SocialList from "@/components/SocialList";
 import { sortMDByDate } from "@/utils";
 import { Image } from "astro:assets";
+import MCP from "../assets/Blog/mcp.png";
 
 const MAX_POSTS = 10;
 const allPosts = await getCollection("post");
@@ -16,25 +17,33 @@ const allPostsByDate = sortMDByDate(visiblePosts).slice(0, MAX_POSTS);
 	<section>
 		<h1 class="title pb-6">Hey there!</h1>
 		<p class="mb-4">
-			I'm Babuaravind (Babu). I'm a DevEx Engineer with a passion for developer tooling
+			I'm Babuaravind (Babu), a Software Engineer with a passion for customer success and developer tooling
 			that saves time and broken keyboards. I'm currently doing Developer Relations at
 			<a
 				href="https://www.uniswapfoundation.org/"
 				target="_blank"
 				rel="noopener noreferrer"
 				class="style-link"
-				> Uniswap Foundation
-			</a>and reading whitepapers on the side.
+				> Uniswap Foundation</a> and consuming whitepapers along the way.
 		</p>
 		<SocialList />
 	</section>
 	<section class="mt-8 -ml-5 flex justify-left">
-		<a href="https://linkedin.com/in/babuaravind-gururaj" target="_blank" rel="noopener noreferrer" class="handdrawn-btn ml-5 text-base bg-[#D0F0C5] dark:bg-[#679158]">
-			Open to relocating for new opportunities in the USA!
+		<a href="https://linkedin.com/in/babuaravind-gururaj" target="_blank" rel="noopener noreferrer" class="handdrawn-btn ml-5 text-base bg-[#D0F0C5] dark:bg-[#235140]">
+			Open to new opportunities in the USA!
 		</a>
 	</section>
-	<section aria-label="Blog post list" class="mt-8">
-		<h2 class="title mb-4 text-xl">Posts</h2>
+	<section class="mt-12">
+		<h2 class="title mb-4 text-xl">Awards</h2>
+		<ul class="space-y-4 sm:space-y-2">
+			<li>
+				<span class="underline">Lux Veritas Virtus</span>:
+				<p class="inline-block sm:mt-2">Top 75 graduating Masters students at Northeastern University</p>
+			</li>
+		</ul>
+	</section>
+	<section aria-label="Blog post list" class="mt-12">
+		<h2 class="title mb-2 text-xl">Posts</h2>
 		<ul class="space-y-4 sm:space-y-2">
 			{
 				allPostsByDate.map((p) => (
@@ -45,107 +54,30 @@ const allPostsByDate = sortMDByDate(visiblePosts).slice(0, MAX_POSTS);
 			}
 		</ul>
 	</section>
-	<!-- <section class="mt-16">
-		<h2 class="title mb-4 text-xl">Extras</h2>
+	<section class="mt-12">
+		<h2 class="title mb-4 text-xl">Projects</h2>
 		<ul class="space-y-4 sm:space-y-2">
 			<li>
 				<a
-					href="https://orbiter.host"
+					href="https://github.com/aravind33b/Uniswap_Docs_MCP"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="style-link inline-block"
-					><Image
-						src="https://api.iconify.design/hugeicons:orbit-01.svg?color=%23888888"
-						class="inline-block h-4 w-4"
-						height="100"
-						width="100"
-						alt="rasp pi logo"
-					/> Orbiter
+					>
+					Uniswap Docs MCP
 				</a>:
-				<p class="inline-block sm:mt-2">A static site hosting platform with Justin Hunter</p>
+				<p class="inline-block sm:mt-2">An Uniswap docs MCP server, for LLM based coding</p>
 			</li>
 			<li>
 				<a
-					href="https://bhvr.dev"
+					href="https://www.github.com/aravind33b/UniCowV2"
 					target="_blank"
 					rel="noopener noreferrer"
 					class="style-link inline-block"
-					><Image
-						src="https://api.iconify.design/fluent-emoji-high-contrast:beaver.svg?color=%23888888"
-						class="inline-block h-4 w-4"
-						height="100"
-						width="100"
-						alt="bhvr"
-					/> bhvr
+					>UniCowV2
 				</a>:
-				<p class="inline-block sm:mt-2">Modern framework for building web apps using Bun, Hono, Vite, and React</p>
-			</li>
-			<li>
-				<a
-					href="https://bearblog.stevedylan.dev"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="style-link inline-block"
-					><Image
-						src="https://api.iconify.design/mingcute:bear-fill.svg?color=%23888888"
-						class="inline-block h-4 w-4"
-						height="100"
-						width="100"
-						alt="Bear Logo"
-					/> Bear Blog
-				</a>:
-				<p class="inline-block sm:mt-2">A casual blog for building an open social web</p>
-			</li>
-			<li>
-				<a
-					href="https://ethglobal.com/showcase/cosmic-cowboys-3q0co"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="style-link inline-block"
-					><Image
-						height="100"
-						width="100"
-						src="https://api.iconify.design/ph:cowboy-hat-fill.svg?color=%23888888"
-						class="inline-block h-4 w-4"
-						alt="cowboy logo"
-					/> Cosmic Cowboys
-				</a>:
-				<p class="inline-block sm:mt-2">EthGlobal 2023 hackathon winning project</p>
-			</li>
-			<li>
-				<a
-					href="https://steve.photo"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="style-link inline-block"
-					><Image
-						height="100"
-						width="100"
-						src="https://api.iconify.design/material-symbols:photo-camera.svg?color=%23888888"
-						class="inline-block h-4 w-4"
-						alt="camera icon"
-					/> Photos
-				</a>:
-				<p class="inline-block sm:mt-2">My personal photography portfolio</p>
-			</li>
-			<li>
-				<a
-					href="https://openzeppelin.com"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="style-link inline-block"
-					><Image
-						height="100"
-						width="100"
-						src="https://files.stevedylan.dev/openzeppelin-logo.png"
-						class="inline-block h-4 w-4"
-						alt="OpenZeppelin Logo"
-					/> OpenZeppelin
-				</a>:
-				<p class="inline-block sm:mt-2">
-					Where I'm currently working as a DevRel
-				</p>
+				<p class="inline-block sm:mt-2">Coincidence of Wants based swap matching as a Uniswap v4 Hook</p>
 			</li>
 		</ul>
-	</section> -->
+	</section>
 </PageLayout>
