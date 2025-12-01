@@ -15,6 +15,10 @@ export const MENU_LINKS = [
 		title: "Projects",
 		path: "/projects",
 	},
+	{
+		title: "Awards",
+		path: "/awards",
+	},
 ];
 
 // ! Remember to add your own socials
