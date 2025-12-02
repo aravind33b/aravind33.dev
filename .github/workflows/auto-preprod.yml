@@ -1,0 +1,32 @@
+name: Auto pre-prod merge
+on:
+    push:
+        branches-ignore:
+            - main
+            - pre-prod
+jobs:
+    pre-prod-merge:
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+            - name: Setup Git user
+              run: |
+                git config user.name "GitHub Actions"
+                git config user.email "actions@github.com"
+            - name: Merge current branch into pre-prod
+              env:
+                SRC_BRANCH: ${{ github.ref_name }}
+              run: |
+                git fetch origin
+                git checkout pre-prod
+                git merge --no-ff "origin/${SRC_BRANCH}" -m "Auto-merge ${SRC_BRANCH} into pre-prod"
+            - name: Push pre-prod to origin
+              env:
+                PAT: ${{ secrets.PREPROD_PUSH_TOKEN }}
+              run: |
+                git remote set-url origin "https://x-access-token:${PAT}@github.com/${GITHUB_REPOSITORY}.git"
+                git push origin pre-prod
