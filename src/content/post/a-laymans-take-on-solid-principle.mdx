@@ -1,0 +1,29 @@
+---
+title: "What are SOLID principles"
+publishDate: "6 Dec 2025"
+description: "A layman's take on SOLID principles"
+tags: ["programming", "design", "Layman talks"]
+ogImage: "/blog-images/cloudinary/bridge.png"
+---
+
+SOLID principle is something that proposes a few rules of thumb to keep your system as abstracted as possible.
+
+But what is abstraction though? It's nothing but simplifying your system to the level that it masks the working behind well enough to perform a task. For example, A TV remote has power on button, pressing which once will turn the TV on and pressing again will turn it off, nobody needs to know what happens behind the scenes to operate it.
+
+So how does SOLID help this case?
+SOLID is a set of principles to help you desgin and develop abstracted systems that can be used, modified without major hiccups.
+
+Here's SOLID in detail with the use of a TV remote:
+S - Single Responsibility: Every class should only handle one use case. In a TV remote, the power button should only handle turning on and off of system.
+
+O - Open closed: Every method in a class should be open enough to be accessed and extended but closed to modification. i.e, a TV remote can have a button whose functionality can be inherited by another button and built on top of, but the original button's functionality itself should not be modified.
+
+Now on to the confusing triplets, as I look at them:
+
+L - Liskov Substituition: A child class must be a drop-in replacement for the parent without breaking the system. Think of a remote battery. If the remote expects a standard "AA Battery" (Parent), and you use a "Rechargeable AA" (Child), it must still fit the slot and provide power. If the child battery is shaped like a square or melts the circuit, it violates this principle—even if it's technically a battery.
+
+I - Interface separation: Don't force a user to depend on features they don't use. Imagine a Universal Remote that has buttons for a TV, a Drone, and a Microwave. If you just want to change the channel, you shouldn't be forced to hold a massive, heavy brick with Drone controls. It is better to have separate, focused remotes (interfaces) than one giant confusing one.
+
+D - Dependency inversion: High-level functions shouldn't be hardwired to low-level details, both should rely on standards. If your remote was soldered directly into a specific Sony TV's circuit board, you couldn't replace the TV without throwing away the remote. Instead, the remote relies on a standard Infrared Signal. It doesn't care if the TV is Sony or Samsung, as long as it respects the standard.
+
+Why I called them triplets? Because, they are all interconnected such that it could even confuse you which is which. But on keenly observing, you see that Liskov's substitution wants the child to be an extension of parent, otherwise will throw an error. Interface segregation wants a class to only have functionalities is needs but would still function otherwise and Dependency inversion expects parent class to be abstracted as much as possible that it can be future-proofed for any changes, failing which will need you to modify the parent class, but will not throw an error in the present.
