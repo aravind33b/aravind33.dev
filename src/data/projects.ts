@@ -1,8 +1,8 @@
 import type { ImageMetadata } from "astro";
-import MCP from "../assets/Blog/mcp.png";
-import UniInterface from "../assets/Blog/UniswapTestInterface.png";
-import UniCow from "../assets/Blog/UniCoW.png";
-import GCP from "../assets/Blog/gcp.png";
+import MCP from "../assets/Projects/mcp.png";
+import UniInterface from "../assets/Projects/UniswapTestInterface.png";
+import UniCow from "../assets/Projects/UniCoW.png";
+import GCP from "../assets/Projects/gcp.png";
 
 export type ProjectItem = {
 	title: string;
