@@ -7,6 +7,8 @@ on:
 jobs:
     pre-prod-merge:
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
         
         steps:
             - name: Checkout
@@ -25,8 +27,6 @@ jobs:
                 git checkout pre-prod
                 git merge --no-ff "origin/${SRC_BRANCH}" -m "Auto-merge ${SRC_BRANCH} into pre-prod"
             - name: Push pre-prod to origin
-              env:
-                PAT: ${{ secrets.PREPROD_PUSH_TOKEN }}
               run: |
-                git remote set-url origin "https://x-access-token:${PAT}@github.com/${GITHUB_REPOSITORY}.git"
+                git remote set-url origin "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git"
                 git push origin pre-prod
