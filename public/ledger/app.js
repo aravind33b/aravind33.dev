@@ -702,9 +702,22 @@ async function boot(){
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/ledger/sw.js").catch(()=>{});
   }
-  const salt = await kvGet("salt").catch(()=>null);
+  let salt = null;
+  try {
+    salt = await kvGet("salt");
+  } catch(e) {
+    // IndexedDB unavailable (e.g. private browsing restriction) — treat as fresh setup
+    salt = null;
+  }
   S.salt = salt || null;
   S._needSetup = !salt;
   renderLock();
 }
-boot();
+boot().catch(function(err) {
+  var el = document.getElementById("app");
+  if (el) {
+    el.innerHTML = '<div style="padding:32px;color:#EFEDE6;font-family:sans-serif;line-height:1.6">'
+      + '<b>Failed to start.</b><br><br>' + (err && err.message ? err.message : String(err))
+      + '</div>';
+  }
+});

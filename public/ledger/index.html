@@ -156,13 +156,22 @@
 <script>
   // If anything throws before the app can render, show a visible message
   // instead of a silent blank screen.
+  function showBootError(msg) {
+    var el = document.getElementById("app");
+    if (el) {
+      el.innerHTML = '<div style="padding:32px;color:#EFEDE6;font-family:sans-serif;line-height:1.6">'
+        + '<b>Something failed to load.</b><br><br>' + (msg || "Unknown error")
+        + '<br><br>Try reloading. If this keeps happening, your browser may not support a required API (IndexedDB or Web Crypto).</div>';
+    }
+  }
   window.addEventListener("error", function (e) {
     var el = document.getElementById("app");
-    if (el && !el.hasChildNodes()) {
-      el.innerHTML = '<div style="padding:32px;color:#EFEDE6;font-family:sans-serif;line-height:1.6">'
-        + '<b>Something failed to load.</b><br><br>' + (e.message || "Unknown error")
-        + '<br><br>Try reloading. If this keeps happening on this network, it may be blocking a script this app needs.</div>';
-    }
+    if (el && !el.hasChildNodes()) showBootError(e.message);
+  });
+  // Catch async errors from boot() — these are silent without this handler
+  window.addEventListener("unhandledrejection", function (e) {
+    var el = document.getElementById("app");
+    if (el && !el.hasChildNodes()) showBootError(e.reason && (e.reason.message || String(e.reason)));
   });
 </script>
 <script src="app.js" defer></script>
