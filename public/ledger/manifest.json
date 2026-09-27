@@ -1,0 +1,17 @@
+{
+  "name": "Ledger — Expense Tracker",
+  "short_name": "Ledger",
+  "description": "On-device receipt scanning and category spend tracking.",
+  "start_url": "/ledger/",
+  "scope": "/ledger/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14181A",
+  "theme_color": "#14181A",
+  "icons": [
+    { "src": "/ledger/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/ledger/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/ledger/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/ledger/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

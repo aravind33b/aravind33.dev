@@ -1,0 +1,60 @@
+---
+import PageLayout from "@/layouts/Base";
+import { Image } from "astro:assets";
+import aboutImg from "../assets/pfp.jpg";
+
+const meta = {
+	title: "Uniswap works",
+	description: "Some of my best works at Uniswap",
+};
+---
+
+<PageLayout meta={meta}>
+  <div class="space-y-6">
+    <h1 class="title">Best works at Uniswap</h1>
+    <p>
+      <a
+        class="style-link inline-block"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Uniswap Foundation"
+        href="https://github.com/aravind33b/Uniswap_Docs_MCP"
+      >
+        Built an MCP server for Uniswap docs to enable LLM powered coding.</a>
+    </p>
+    <p>
+      <a
+        class="style-link inline-block"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Uniswap Foundation"
+        href="https://github.com/uniswap/docs/pull/1026"
+      >
+        Built automatic LLMs.txt generation for Uniswap docs.</a>
+    </p>
+    <p>
+      <a
+        class="style-link inline-block"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Uniswap Foundation"
+        href="https://github.com/Uniswap/docs/pull/924"
+      >
+        Wrote a guide for Accessing msg.sender inside v4 hooks.</a>
+    </p>
+  </div>
+  <div class="mt-12 space-y-6">
+    <h1 class="title">Interested in checking them all?</h1>
+    <p>
+      <a
+        class="style-link inline-block"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Uniswap Foundation"
+        href="https://github.com/Uniswap/docs/pulls?q=is%3Apr+is%3Aclosed+author%3Aaravind33b"
+      >
+        Here's my public contribution to Uniswap docs.
+      </a>
+    </p>
+  </div>
+</PageLayout>
