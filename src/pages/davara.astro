@@ -1,0 +1,500 @@
+---
+// Standalone concept page — intentionally does not use the site's Base layout,
+// since it ships its own nav, footer, fonts and palette.
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Davara — Bengaluru's First 24/7 Filter Coffee Bar</title>
+<meta name="description" content="Davara — a concept for Bengaluru's first 24/7 filter coffee bar. Decoction on tap, dosas at 3am, and a table for the builders who don't watch the clock.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:title" content="Davara — Bengaluru's First 24/7 Filter Coffee Bar">
+<meta property="og:description" content="A concept for Bengaluru's first 24/7 filter coffee bar.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://aravind33.dev/davara">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Baloo+2:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style is:global>
+  :root{
+    --ink:#2A2419;
+    --ink-soft:#EFE6CE;
+    --cream:#FBF7EC;
+    --paper:#FFFDF7;
+    --yellow:#F2B705;
+    --leaf:#4C7A5A;
+    --leaf-deep:#DCE9DE;
+    --steel:#8A8064;
+    --line: rgba(42,36,25,0.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif;}
+  .stamp{font-family:'Baloo 2',sans-serif;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 28px;}
+
+  /* rickshaw stripe divider - signature element */
+  .stripe{
+    height:14px;
+    background:repeating-linear-gradient(-45deg,var(--yellow) 0 22px, var(--ink-soft) 22px 44px);
+    width:100%;
+  }
+  .stripe.thin{height:8px;}
+
+  /* NAV */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(251,247,236,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:1140px;margin:0 auto;padding:16px 28px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:0.5px;}
+  .logo .dot{width:10px;height:10px;border-radius:50%;background:var(--yellow);}
+  .nav-links{display:flex;gap:28px;font-size:14px;font-weight:500;color:var(--steel);}
+  .nav-links a:hover{color:var(--ink);}
+  .order-btn{
+    background:var(--yellow);color:var(--ink);font-weight:700;font-size:13px;
+    padding:10px 18px;border-radius:100px;letter-spacing:0.3px;
+  }
+  @media(max-width:720px){.nav-links{display:none;}}
+
+  /* HERO */
+  .hero{
+    padding:96px 0 56px;
+    position:relative;
+  }
+  .hero-eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;
+    color:var(--ink);background:var(--yellow);
+    padding:7px 14px;border-radius:100px;
+    transform:rotate(-2deg);
+    margin-bottom:28px;
+  }
+  .hero h1{
+    font-size:clamp(40px,7vw,84px);
+    font-weight:800;
+    line-height:0.98;
+    letter-spacing:-0.02em;
+    max-width:920px;
+  }
+  .hero h1 .accent{color:var(--yellow);}
+  .hero-sub{
+    margin-top:26px;
+    font-size:19px;
+    color:var(--steel);
+    max-width:520px;
+    line-height:1.55;
+  }
+  .hero-cta{display:flex;gap:14px;margin-top:36px;flex-wrap:wrap;}
+  .btn-primary{background:var(--yellow);color:var(--ink);font-weight:700;padding:14px 26px;border-radius:100px;font-size:15px;}
+  .btn-ghost{border:1px solid var(--line);color:var(--ink);padding:14px 26px;border-radius:100px;font-size:15px;font-weight:600;}
+
+  /* davara pour graphic */
+  .pour-wrap{
+    position:absolute; right:0; top:60px; width:340px; height:340px;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0.9;
+  }
+  @media(max-width:980px){.pour-wrap{display:none;}}
+
+  /* stat strip */
+  .stats{
+    display:flex; flex-wrap:wrap; gap:0;
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    margin-top:64px;
+  }
+  .stat{
+    flex:1; min-width:150px;
+    padding:24px 28px;
+    border-right:1px solid var(--line);
+  }
+  .stat:last-child{border-right:none;}
+  .stat .num{font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:800;color:var(--yellow);}
+  .stat .label{font-size:12px;color:var(--steel);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;}
+
+  /* sponsor marquee */
+  .marquee-outer{
+    overflow:hidden; padding:22px 0; border-bottom:1px solid var(--line);
+    background:var(--ink-soft);
+  }
+  .marquee-label{
+    text-align:center;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;
+    color:var(--steel); margin-bottom:14px;
+  }
+  .marquee-track{
+    display:flex; gap:56px; white-space:nowrap;
+    animation:scroll 26s linear infinite;
+    width:max-content;
+  }
+  @keyframes scroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  .marquee-track span{
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:22px; color:var(--steel);
+    opacity:0.75;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .marquee-track{animation:none;}
+  }
+
+  section{padding:88px 0;}
+  .section-head{margin-bottom:44px;}
+  .kicker{
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:13px;
+    color:var(--yellow); text-transform:uppercase; letter-spacing:0.08em;
+  }
+  .section-head h2{font-size:clamp(30px,4vw,46px);font-weight:800;margin-top:8px;letter-spacing:-0.01em;}
+  .section-sub{color:var(--steel);margin-top:10px;font-size:15px;max-width:560px;}
+
+  /* exclusive drink cards */
+  .drink-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(258px,1fr)); gap:20px;
+  }
+  .drink-card{
+    background:var(--ink-soft); border:1px solid var(--line); border-radius:16px;
+    padding:22px; position:relative; overflow:hidden;
+  }
+  .drink-card:hover{border-color:var(--yellow);}
+  .stamp-badge{
+    display:inline-block; font-family:'Baloo 2',sans-serif; font-weight:700; font-size:11px;
+    color:var(--paper); background:var(--leaf); padding:5px 11px; border-radius:100px;
+    transform:rotate(-3deg); margin-bottom:14px; letter-spacing:0.02em;
+  }
+  .drink-card h4{font-size:19px; font-weight:800; margin-bottom:6px;}
+  .drink-card .desc{font-size:13.5px; color:var(--steel); line-height:1.5; margin-bottom:14px; min-height:52px;}
+  .drink-card .foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:12px;}
+  .drink-card .price{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--yellow);font-size:15px;}
+  .drink-card .protein{font-size:11px;color:var(--leaf);font-weight:600;}
+
+  /* smoothies */
+  .smoothie-grid{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  @media(max-width:760px){.smoothie-grid{grid-template-columns:1fr;}}
+  .smoothie-card{
+    background:linear-gradient(160deg, var(--leaf-deep), var(--ink-soft));
+    border-radius:20px; padding:32px; border:1px solid var(--line);
+  }
+  .smoothie-card h3{font-size:24px;font-weight:800;margin-bottom:8px;}
+  .smoothie-card .sub{color:var(--yellow);font-family:'Baloo 2',sans-serif;font-weight:700;font-size:13px;margin-bottom:14px;}
+  .smoothie-card p{color:var(--steel);font-size:13.5px;line-height:1.6;margin-bottom:16px;}
+  .smoothie-card .foot{display:flex;justify-content:space-between;align-items:center;}
+  .smoothie-card .price{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:18px;}
+
+  /* locations */
+  .loc-strip{
+    display:flex; flex-wrap:wrap; gap:14px;
+  }
+  .loc-pill{
+    display:flex; align-items:center; gap:10px;
+    border:1px solid var(--line); border-radius:100px; padding:12px 20px;
+    font-size:14px; font-weight:600;
+  }
+  .loc-pill .tag{
+    font-family:'Baloo 2',sans-serif; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:100px;
+    text-transform:uppercase; letter-spacing:0.04em;
+  }
+  .tag.live{background:var(--leaf); color:#0d150f;}
+  .tag.soon{background:var(--ink); color:var(--cream); border:1px solid var(--line);}
+  .loc-pill .area{color:var(--steel); font-size:12px;}
+
+  /* press */
+  .press-row{
+    display:flex; flex-wrap:wrap; gap:40px; align-items:center; justify-content:center;
+    opacity:0.85;
+  }
+  .press-item{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:17px;color:var(--steel);text-align:center;}
+  .press-item small{display:block;font-family:'Inter',sans-serif;font-weight:400;font-size:11px;color:var(--line);margin-top:2px;}
+
+  /* footer */
+  footer{
+    background:var(--ink-soft); padding:64px 0 32px; border-top:1px solid var(--line);
+  }
+  .footer-top{display:flex; justify-content:space-between; flex-wrap:wrap; gap:48px; margin-bottom:48px;}
+  .footer-brand h3{font-size:26px;font-weight:800;margin-bottom:10px;}
+  .footer-brand p{color:var(--steel);font-size:14px;max-width:280px;line-height:1.6;}
+  .footer-cols{display:flex; gap:56px; flex-wrap:wrap;}
+  .footer-col h4{font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--yellow); margin-bottom:14px; font-family:'Baloo 2',sans-serif;}
+  .footer-col a{display:block; font-size:14px; color:var(--steel); margin-bottom:10px;}
+  .footer-col a:hover{color:var(--ink);}
+  .footer-bottom{
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    padding-top:24px; border-top:1px solid var(--line);
+    font-size:12.5px; color:var(--steel);
+  }
+  .footer-note{
+    margin-top:14px; font-size:11.5px; color:var(--steel); opacity:0.8; max-width:640px; line-height:1.5;
+  }
+  .park-band{
+    position:relative;
+    height:260px;
+    overflow:hidden;
+    background:linear-gradient(180deg, var(--cream) 0%, #EFE9D4 100%);
+  }
+  .park-band svg{position:absolute; bottom:0; left:0; width:100%; height:100%;}
+  .park-caption{
+    position:absolute; top:20px; left:50%; transform:translateX(-50%);
+    font-family:'Baloo 2',sans-serif; font-weight:700; font-size:12px;
+    color:var(--steel); text-transform:uppercase; letter-spacing:0.12em;
+    z-index:2;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo"><span class="dot"></span>DAVARA</div>
+    <div class="nav-links">
+      <a href="#exclusive">Exclusive Drinks</a>
+      <a href="#locations">Locations</a>
+      <a href="#host">Host with us</a>
+    </div>
+    <div class="order-btn">Order online</div>
+  </div>
+</nav>
+
+<div class="hero wrap">
+  <div class="hero-eyebrow">☕ OPEN 24/7 · KORAMANGALA</div>
+  <h1>Because the world's<br>greatest code doesn't<br>compile <span class="accent">@ 5:00.</span></h1>
+  <p class="hero-sub">Bengaluru's first 24/7 filter coffee bar — decoction on tap, dosas at 3am, and a table for the builders who don't watch the clock.</p>
+  <div class="hero-cta">
+    <a href="#exclusive" class="btn-primary">See the drinks</a>
+    <a href="#locations" class="btn-ghost">Find a Davara</a>
+  </div>
+
+  <div class="pour-wrap">
+    <svg width="280" height="280" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="140" cy="248" rx="70" ry="14" fill="#231d17"/>
+      <path d="M95 70 L100 190 Q100 210 140 210 Q180 210 180 190 L185 70 Z" fill="#A79B7C" opacity="0.15" stroke="#A79B7C" stroke-width="2"/>
+      <path d="M110 95 Q140 105 170 95" stroke="#F2B705" stroke-width="2" opacity="0.6"/>
+      <path d="M175 95 Q205 90 205 115 Q205 135 178 132" stroke="#A79B7C" stroke-width="6" fill="none" opacity="0.4"/>
+      <path d="M140 30 Q150 55 140 60 Q130 55 140 30 Z" fill="#F2B705" opacity="0.85"/>
+      <path d="M150 200 Q150 235 140 255 Q130 235 130 200 Z" fill="#F2B705" opacity="0.9"/>
+      <circle cx="140" cy="255" r="20" fill="#F2B705" opacity="0.9"/>
+    </svg>
+  </div>
+</div>
+
+<div class="stripe"></div>
+
+<div class="stats wrap">
+  <div class="stat"><div class="num">24/7</div><div class="label">Never closes</div></div>
+  <div class="stat"><div class="num">03</div><div class="label">Live locations</div></div>
+  <div class="stat"><div class="num">2026</div><div class="label">Since</div></div>
+  <div class="stat"><div class="num">11</div><div class="label">Startup brews</div></div>
+</div>
+
+<div class="marquee-outer">
+  <div class="marquee-label">Brewed with</div>
+  <div class="marquee-track">
+    <span>Razorpay</span><span>Swiggy</span><span>Zerodha</span><span>CRED</span><span>Postman</span><span>Freshworks</span><span>Groww</span><span>Meesho</span><span>PhonePe</span><span>Ola Electric</span>
+    <span>Razorpay</span><span>Swiggy</span><span>Zerodha</span><span>CRED</span><span>Postman</span><span>Freshworks</span><span>Groww</span><span>Meesho</span><span>PhonePe</span><span>Ola Electric</span>
+  </div>
+</div>
+
+<section id="exclusive" class="wrap">
+  <div class="section-head">
+    <div class="kicker">Brand collabs</div>
+    <h2>Exclusive Drinks</h2>
+    <p class="section-sub">Every builder on the block gets a cup. Sponsor a drink, we name it after your product, your users drink it at 2am.</p>
+  </div>
+  <div class="drink-grid">
+    <div class="drink-card">
+      <span class="stamp-badge">By Razorpay</span>
+      <h4>Razorpay Rush</h4>
+      <p class="desc">Double decoction, jaggery, cardamom. Settles in seconds, hits like a payout.</p>
+      <div class="foot"><span class="price">₹120</span><span class="protein">Zero latency</span></div>
+    </div>
+    <div class="drink-card">
+      <span class="stamp-badge">By Swiggy</span>
+      <h4>Instamacha</h4>
+      <p class="desc">Ceremonial matcha, coconut milk, poured in under 10 minutes flat.</p>
+      <div class="foot"><span class="price">₹140</span><span class="protein">10-min brew</span></div>
+    </div>
+    <div class="drink-card">
+      <span class="stamp-badge">By Zerodha</span>
+      <h4>Zen Brew</h4>
+      <p class="desc">Chamomile, ashwagandha, warm milk. No brokerage, no volatility, just calm.</p>
+      <div class="foot"><span class="price">₹130</span><span class="protein">0% commission</span></div>
+    </div>
+    <div class="drink-card">
+      <span class="stamp-badge">By CRED</span>
+      <h4>Cold Brew Club</h4>
+      <p class="desc">18-hour cold brew, orange peel, oat foam. Strictly for members with good credit.</p>
+      <div class="foot"><span class="price">₹150</span><span class="protein">Invite only</span></div>
+    </div>
+    <div class="drink-card">
+      <span class="stamp-badge">By Postman</span>
+      <h4>Cascara Collection</h4>
+      <p class="desc">Coffee-cherry cascara tea, wild honey. Tested hot, iced, and everything in between.</p>
+      <div class="foot"><span class="price">₹110</span><span class="protein">200 OK</span></div>
+    </div>
+    <div class="drink-card">
+      <span class="stamp-badge">By Freshworks</span>
+      <h4>Freshmint Cooler</h4>
+      <p class="desc">Cold brew, mint, lime, soda top-up. A fresh ticket for your afternoon slump.</p>
+      <div class="foot"><span class="price">₹120</span><span class="protein">SLA: instant</span></div>
+    </div>
+    <div class="drink-card">
+      <span class="stamp-badge">By Ola Electric</span>
+      <h4>Zero-to-Sixty Shot</h4>
+      <p class="desc">Triple ristretto, no sugar, served fast. Full charge in one sip.</p>
+      <div class="foot"><span class="price">₹90</span><span class="protein">Fast charging</span></div>
+    </div>
+    <div class="drink-card">
+      <span class="stamp-badge">By Groww</span>
+      <h4>Compounding Greens</h4>
+      <p class="desc">Spinach, banana, dates, oat milk. Small sips, long-term gains.</p>
+      <div class="foot"><span class="price">₹150</span><span class="protein">18g protein</span></div>
+    </div>
+    <div class="drink-card">
+      <span class="stamp-badge">By Meesho</span>
+      <h4>Mishti Doi Shake</h4>
+      <p class="desc">Bengali sweet curd, jaggery, cardamom. Value that actually delivers.</p>
+      <div class="foot"><span class="price">₹100</span><span class="protein">Best price, guaranteed</span></div>
+    </div>
+    <div class="drink-card">
+      <span class="stamp-badge">By PhonePe</span>
+      <h4>Paisa Vasool Protein</h4>
+      <p class="desc">Banana, peanut butter, whey. 100% cashback in gains.</p>
+      <div class="foot"><span class="price">₹160</span><span class="protein">24g protein</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="stripe thin"></div>
+
+<section id="locations" class="wrap">
+  <div class="section-head" style="margin-bottom:0;">
+    <div class="kicker">Around town</div>
+    <h2>Locations</h2>
+    <p class="section-sub">Wherever the standups are.</p>
+  </div>
+</section>
+
+<div class="park-band">
+  <span class="park-caption">Somewhere in Cubbon Park</span>
+  <svg viewBox="0 0 1140 260" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- sky wash -->
+    <rect x="0" y="0" width="1140" height="260" fill="none"/>
+    <!-- distant tree line -->
+    <g opacity="0.35">
+      <circle cx="80" cy="150" r="55" fill="var(--leaf-deep)"/>
+      <circle cx="220" cy="140" r="65" fill="var(--leaf-deep)"/>
+      <circle cx="950" cy="145" r="60" fill="var(--leaf-deep)"/>
+      <circle cx="1080" cy="155" r="50" fill="var(--leaf-deep)"/>
+    </g>
+    <!-- ground -->
+    <path d="M0 205 Q285 175 570 200 T1140 195 L1140 260 L0 260 Z" fill="var(--leaf-deep)"/>
+    <path d="M0 225 Q300 200 600 222 T1140 218 L1140 260 L0 260 Z" fill="var(--leaf)" opacity="0.55"/>
+    <!-- winding path -->
+    <path d="M0 240 Q220 215 430 238 T860 232 T1140 245" stroke="#E8DEBF" stroke-width="18" fill="none" opacity="0.8"/>
+    <!-- big banyan-style tree left -->
+    <g transform="translate(150,0)">
+      <rect x="-6" y="120" width="12" height="90" fill="var(--ink)" opacity="0.55" rx="4"/>
+      <circle cx="0" cy="95" r="58" fill="var(--leaf)"/>
+      <circle cx="-38" cy="115" r="38" fill="var(--leaf)"/>
+      <circle cx="42" cy="118" r="34" fill="var(--leaf)"/>
+      <circle cx="0" cy="70" r="30" fill="var(--leaf-deep)" opacity="0.5"/>
+    </g>
+    <!-- rain tree right, wide canopy like Cubbon Park avenue trees -->
+    <g transform="translate(960,0)">
+      <rect x="-7" y="130" width="14" height="80" fill="var(--ink)" opacity="0.55" rx="4"/>
+      <ellipse cx="0" cy="105" rx="110" ry="50" fill="var(--leaf)"/>
+      <ellipse cx="-50" cy="120" rx="55" ry="30" fill="var(--leaf)"/>
+      <ellipse cx="55" cy="122" rx="50" ry="28" fill="var(--leaf)"/>
+      <ellipse cx="0" cy="85" rx="70" ry="26" fill="var(--leaf-deep)" opacity="0.45"/>
+    </g>
+    <!-- small palm near center -->
+    <g transform="translate(560,0)">
+      <rect x="-4" y="150" width="8" height="70" fill="var(--ink)" opacity="0.5" rx="3"/>
+      <path d="M0 150 Q-40 130 -55 95" stroke="var(--leaf)" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <path d="M0 150 Q40 130 55 95" stroke="var(--leaf)" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <path d="M0 150 Q-20 110 -15 75" stroke="var(--leaf)" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <path d="M0 150 Q20 110 15 75" stroke="var(--leaf)" stroke-width="12" fill="none" stroke-linecap="round"/>
+      <path d="M0 150 Q0 105 0 65" stroke="var(--leaf)" stroke-width="12" fill="none" stroke-linecap="round"/>
+    </g>
+    <!-- bench with a laptop, small figure -->
+    <g transform="translate(380,210)">
+      <rect x="-30" y="10" width="60" height="6" rx="2" fill="var(--ink)" opacity="0.5"/>
+      <rect x="-26" y="16" width="6" height="14" fill="var(--ink)" opacity="0.5"/>
+      <rect x="20" y="16" width="6" height="14" fill="var(--ink)" opacity="0.5"/>
+      <circle cx="-6" cy="-16" r="9" fill="var(--ink)" opacity="0.7"/>
+      <rect x="-14" y="-8" width="16" height="18" rx="4" fill="var(--yellow)"/>
+      <rect x="2" y="0" width="12" height="8" rx="1" fill="var(--ink)" opacity="0.7"/>
+    </g>
+    <!-- another figure walking with a tumbler -->
+    <g transform="translate(720,215)">
+      <circle cx="0" cy="-30" r="8" fill="var(--ink)" opacity="0.6"/>
+      <rect x="-6" y="-22" width="12" height="20" rx="4" fill="var(--leaf)"/>
+      <rect x="-9" y="-2" width="6" height="16" fill="var(--ink)" opacity="0.6"/>
+      <rect x="3" y="-2" width="6" height="16" fill="var(--ink)" opacity="0.6"/>
+      <rect x="9" y="-18" width="4" height="10" fill="var(--yellow)" rx="1"/>
+    </g>
+    <!-- birds -->
+    <path d="M250 40 q6 -8 12 0 q6 -8 12 0" stroke="var(--steel)" stroke-width="2" fill="none" opacity="0.6"/>
+    <path d="M300 60 q6 -8 12 0 q6 -8 12 0" stroke="var(--steel)" stroke-width="2" fill="none" opacity="0.6"/>
+    <path d="M820 35 q6 -8 12 0 q6 -8 12 0" stroke="var(--steel)" stroke-width="2" fill="none" opacity="0.6"/>
+  </svg>
+</div>
+
+<div class="stripe"></div>
+
+<footer id="host">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>DAVARA</h3>
+        <p>Bengaluru's first 24/7 filter coffee bar. For the builders who ship past midnight.</p>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <h4>Cafe</h4>
+          <a href="#exclusive">Exclusive drinks</a>
+          <a href="#host">Host with us</a>
+        </div>
+        <div class="footer-col">
+          <h4>Visit</h4>
+          <a href="#locations">Wherever the standups are</a>
+        </div>
+        <div class="footer-col">
+          <h4>Social</h4>
+          <a href="#">Instagram</a>
+          <a href="#">LinkedIn</a>
+          <a href="#">X</a>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <a href="#">hello@davara.coffee</a>
+          <a href="#">Sponsor a drink</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Davara Coffee Co.</span>
+      <span>Koramangala 5th Block, Bengaluru 560095</span>
+    </div>
+    <p class="footer-note">
+      A fictional concept piece by <a href="/" style="text-decoration:underline;">aravind33.dev</a>. Davara is not a real business,
+      and the company names shown are used illustratively — no affiliation or sponsorship is implied.
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
