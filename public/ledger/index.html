@@ -15,7 +15,6 @@
 <meta name="apple-mobile-web-app-title" content="Ledger">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#14181A">
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
 <style>
   :root {
     --ink: #14181A; --ink-raised: #1C2224; --line: #2B332F;
@@ -154,6 +153,18 @@
 </head>
 <body>
 <div id="app"></div>
-<script src="app.js"></script>
+<script>
+  // If anything throws before the app can render, show a visible message
+  // instead of a silent blank screen.
+  window.addEventListener("error", function (e) {
+    var el = document.getElementById("app");
+    if (el && !el.hasChildNodes()) {
+      el.innerHTML = '<div style="padding:32px;color:#EFEDE6;font-family:sans-serif;line-height:1.6">'
+        + '<b>Something failed to load.</b><br><br>' + (e.message || "Unknown error")
+        + '<br><br>Try reloading. If this keeps happening on this network, it may be blocking a script this app needs.</div>';
+    }
+  });
+</script>
+<script src="app.js" defer></script>
 </body>
 </html>
