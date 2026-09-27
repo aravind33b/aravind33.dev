@@ -163,8 +163,24 @@ function runRetention(){
 
 /* ============================== OCR: Tesseract first, Claude fallback ============================== */
 
+let _tesseractLoadPromise = null;
+function loadTesseractScript(){
+  if (window.Tesseract) return Promise.resolve();
+  if (_tesseractLoadPromise) return _tesseractLoadPromise;
+  _tesseractLoadPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";
+    const timer = setTimeout(() => reject(new Error("Tesseract took too long to load")), 20000);
+    s.onload = () => { clearTimeout(timer); resolve(); };
+    s.onerror = () => { clearTimeout(timer); _tesseractLoadPromise = null; reject(new Error("Couldn't load the on-device OCR library")); };
+    document.head.appendChild(s);
+  });
+  return _tesseractLoadPromise;
+}
+
 async function getTessWorker(onProgress){
   if (S.tessWorker) return S.tessWorker;
+  await loadTesseractScript();
   const worker = await Tesseract.createWorker("eng", 1, {
     logger: (m) => { if (onProgress && m.status === "recognizing text") onProgress(m.progress); },
   });
