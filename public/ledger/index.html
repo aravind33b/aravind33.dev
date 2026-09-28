@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="/ledger/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ledger">
@@ -22,7 +22,8 @@
     --text: #EFEDE6; --text-dim: #9A9090; --text-faint: #6B6060;
     --font-ui: 'Work Sans', system-ui, -apple-system, sans-serif;
     --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
-    --font-display: 'Barlow Condensed', 'Work Sans', system-ui, sans-serif;
+    --font-display: 'Anton', Impact, sans-serif;
+    --err: #C06B4C;
     box-sizing: border-box;
   }
   @media (prefers-color-scheme: light) {
@@ -59,7 +60,7 @@
   .btn-primary { width: 100%; background: var(--moss-bright); color: #FFFFFF; border: none; padding: 15px; border-radius: 10px; font-size: 15.5px; font-weight: 600; margin-top: 6px; }
   .btn-primary:disabled { opacity: .5; }
   .btn-ghost { width: 100%; background: transparent; color: var(--text-dim); border: 1px solid var(--line); padding: 13px; border-radius: 10px; font-size: 14.5px; margin-top: 10px; }
-  .err-msg { color: var(--rust); font-size: 13.5px; margin-top: 10px; min-height: 18px; }
+  .err-msg { color: var(--err); font-size: 13.5px; margin-top: 10px; min-height: 18px; }
   .lock-foot { margin-top: 28px; font-size: 12.5px; color: var(--text-faint); line-height: 1.6; }
 
   .topbar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 6px; }
@@ -83,7 +84,7 @@
   .total-amt { font-family: var(--font-display); font-size: 42px; font-weight: 800; letter-spacing: .01em; }
   .total-amt span { color: var(--text-faint); font-size: 24px; }
 
-  .section-label { font-size: 12px; color: var(--text-faint); letter-spacing: .03em; margin: 22px 0 10px; }
+  .section-label { font-size: 12px; color: var(--text-faint); letter-spacing: .03em; margin: 22px 0 14px; padding-bottom: 8px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='6'%3E%3Cpolyline points='0%2C6 5%2C0 10%2C6 15%2C0 20%2C6' fill='none' stroke='%23C8A951' stroke-width='1.5' stroke-linejoin='miter'/%3E%3C/svg%3E") repeat-x bottom / 14px 6px; }
 
   .cat-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .cat-row:last-child { border-bottom: none; }
@@ -124,30 +125,34 @@
   .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--moss-bright); animation: spin .8s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .progress-track { height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: 8px; }
-  .progress-fill { height: 100%; background: var(--moss); border-radius: 3px; transition: width .2s; }
+  .progress-fill { height: 100%; background: var(--moss-bright); border-radius: 3px; transition: width .2s; }
 
   .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
   .cat-chip-btn { padding: 9px 13px; border-radius: 20px; border: 1px solid var(--line); background: var(--ink-raised); color: var(--text-dim); font-size: 13px; display: flex; align-items: center; gap: 6px; }
-  .cat-chip-btn.sel { border-color: var(--moss); color: var(--text); background: rgba(108,138,110,.16); }
+  .cat-chip-btn.sel { border-color: var(--moss-bright); color: var(--text); background: rgba(219,0,7,.13); }
 
   .ai-note { font-size: 12.5px; color: var(--text-faint); background: var(--ink-raised); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 12px 0; line-height: 1.55; }
   .ai-note b { color: var(--moss-bright); }
-  .ai-note.warn b { color: var(--rust); }
+  .ai-note.warn b { color: var(--err); }
 
   .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--line); gap: 10px; }
   .settings-row:last-child { border-bottom: none; }
   .settings-row .st-label { font-size: 14.5px; font-weight: 500; }
   .settings-row .st-sub { font-size: 12.5px; color: var(--text-faint); margin-top: 2px; }
   .settings-row button { background: var(--ink-raised); border: 1px solid var(--line); color: var(--text); padding: 8px 14px; border-radius: 8px; font-size: 13px; white-space: nowrap; }
-  .settings-row button.danger { color: var(--rust); border-color: var(--rust); background: transparent; }
+  .settings-row button.danger { color: var(--err); border-color: var(--err); background: transparent; }
 
   .toast { position: fixed; bottom: calc(92px + env(safe-area-inset-bottom,0px)); left: 50%; transform: translateX(-50%);
     background: var(--ink-raised); border: 1px solid var(--line); color: var(--text); padding: 11px 18px; border-radius: 30px;
     font-size: 13.5px; z-index: 50; box-shadow: 0 6px 20px rgba(0,0,0,.4); max-width: 90%; text-align: center; }
 
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 60; display: flex; align-items: flex-end; }
-  .modal-sheet { background: var(--ink-raised); border-top: 1px solid var(--line); border-radius: 18px 18px 0 0; width: 100%; max-width: 480px;
-    margin: 0 auto; padding: 20px 20px calc(24px + env(safe-area-inset-bottom,0px)); max-height: 82vh; overflow-y: auto; }
+  .modal-sheet { border-top: none; border-radius: 18px 18px 0 0; width: 100%; max-width: 480px;
+    margin: 0 auto; padding: 30px 20px calc(24px + env(safe-area-inset-bottom,0px)); max-height: 82vh; overflow-y: auto;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='10'%3E%3Cpolyline points='0%2C10 5%2C0 10%2C10 15%2C0 20%2C10' fill='none' stroke='%23C8A951' stroke-width='2' stroke-linejoin='miter'/%3E%3C/svg%3E") repeat-x top center / 20px 10px,
+      linear-gradient(var(--moss-bright) 10px, transparent 10px),
+      var(--ink-raised); }
   .modal-sheet h3 { margin-bottom: 14px; }
   .hidden { display: none !important; }
 
@@ -212,7 +217,7 @@
   });
   document.addEventListener("DOMContentLoaded", function() {
     var s = document.createElement("script");
-    s.src = "/ledger/ledger-core.js";
+    s.src = "/ledger/ledger-core.js?v=4";
     s.onerror = function() {
       var el = document.getElementById("app");
       if (el) el.innerHTML = '<div style="padding:32px;color:#EFEDE6;font-family:sans-serif;line-height:1.6">'
