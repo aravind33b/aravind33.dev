@@ -182,7 +182,7 @@
   document.addEventListener("DOMContentLoaded", function() {
     diag("DOM ready. Loading app.js…");
     var s = document.createElement("script");
-    s.src = "app.js?" + Date.now(); // cache-bust to avoid stale blocked response
+    s.src = "ledger-core.js?" + Date.now(); // cache-bust to avoid stale blocked response
     s.onerror = function(e) {
       diag("app.js FAILED TO LOAD — likely blocked by an ad blocker, content blocker, or network error. Try disabling any browser extensions and reload.");
     };
