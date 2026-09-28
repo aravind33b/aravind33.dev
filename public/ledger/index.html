@@ -152,24 +152,29 @@
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="app">
+  <!-- visible before JS runs — JS clears this immediately -->
+  <div id="diag" style="position:fixed;top:0;left:0;right:0;background:#1C2224;color:#8AAE8C;font-family:monospace;font-size:13px;padding:12px 16px;z-index:9999;white-space:pre-wrap;word-break:break-all;">HTML loaded. Waiting for JS…</div>
+</div>
 <script>
-  // If anything throws before the app can render, show a visible message
-  // instead of a silent blank screen.
+  function diag(msg) {
+    var el = document.getElementById("diag");
+    if (el) el.textContent = msg;
+  }
   function showBootError(msg) {
     var el = document.getElementById("app");
     if (el) {
       el.innerHTML = '<div style="padding:32px;color:#EFEDE6;font-family:sans-serif;line-height:1.6">'
-        + '<b>Something failed to load.</b><br><br>' + (msg || "Unknown error")
-        + '<br><br>Try reloading. If this keeps happening, your browser may not support a required API (IndexedDB or Web Crypto).</div>';
+        + '<b>Failed to load.</b><br><br>' + (msg || "Unknown error") + '</div>';
     }
   }
   window.addEventListener("error", function (e) {
+    diag("JS error: " + (e.message || "unknown") + " (line " + e.lineno + ")");
     var el = document.getElementById("app");
     if (el && !el.hasChildNodes()) showBootError(e.message);
   });
-  // Catch async errors from boot() — these are silent without this handler
   window.addEventListener("unhandledrejection", function (e) {
+    diag("Async error: " + (e.reason && (e.reason.message || String(e.reason))));
     var el = document.getElementById("app");
     if (el && !el.hasChildNodes()) showBootError(e.reason && (e.reason.message || String(e.reason)));
   });

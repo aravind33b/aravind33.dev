@@ -698,22 +698,28 @@ async function doErase(){
 }
 
 /* ============================== BOOT ============================== */
+function diag(msg){ var el=document.getElementById("diag"); if(el) el.textContent=msg; }
 async function boot(){
+  diag("JS running. Registering SW…");
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/ledger/sw.js").catch(()=>{});
   }
+  diag("Opening IndexedDB…");
   let salt = null;
   try {
     salt = await kvGet("salt");
+    diag("IndexedDB OK. Rendering lock screen…");
   } catch(e) {
-    // IndexedDB unavailable (e.g. private browsing restriction) — treat as fresh setup
+    diag("IndexedDB error: " + (e && e.message ? e.message : String(e)) + " — continuing as new setup");
     salt = null;
   }
   S.salt = salt || null;
   S._needSetup = !salt;
   renderLock();
+  // renderLock clears #app (removing the diag banner) — if we still see the banner after this, renderLock didn't run
 }
 boot().catch(function(err) {
+  diag("boot() crashed: " + (err && err.message ? err.message : String(err)));
   var el = document.getElementById("app");
   if (el) {
     el.innerHTML = '<div style="padding:32px;color:#EFEDE6;font-family:sans-serif;line-height:1.6">'
