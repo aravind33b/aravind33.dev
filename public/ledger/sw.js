@@ -1,7 +1,8 @@
-const CACHE = "ledger-v1";
+const CACHE = "ledger-v3";
 const SHELL = [
   "/ledger/",
   "/ledger/index.html",
+  "/ledger/ledger-core.js",
   "/ledger/manifest.json",
   "/ledger/icons/icon-192.png",
   "/ledger/icons/icon-512.png",
