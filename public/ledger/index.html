@@ -180,11 +180,13 @@
   });
   // Load app.js dynamically so we can catch load failures (network errors / blocked by extension)
   document.addEventListener("DOMContentLoaded", function() {
-    diag("DOM ready. Loading app.js…");
+    // Use absolute path — relative paths break when URL has no trailing slash (e.g. /ledger vs /ledger/)
+    var scriptUrl = "/ledger/ledger-core.js";
+    diag("DOM ready. Fetching: " + scriptUrl);
     var s = document.createElement("script");
-    s.src = "ledger-core.js?" + Date.now(); // cache-bust to avoid stale blocked response
-    s.onerror = function(e) {
-      diag("app.js FAILED TO LOAD — likely blocked by an ad blocker, content blocker, or network error. Try disabling any browser extensions and reload.");
+    s.src = scriptUrl;
+    s.onerror = function() {
+      diag("FAILED to load: " + scriptUrl + "\nDoc URL: " + window.location.href + "\nThis script loaded OK (inline). Only the external file is blocked.");
     };
     document.body.appendChild(s);
   });
