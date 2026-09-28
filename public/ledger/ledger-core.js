@@ -40,8 +40,8 @@ const JUNK_FOOD_RE = new RegExp(
 );
 const DETAIL_RETENTION_MONTHS = 6;
 const ROLLUP_RETENTION_MONTHS = 24;
-const OCR_CONFIDENCE_THRESHOLD = 65; // below this mean confidence, fall back to Claude
-const CLAUDE_MODEL = "claude-haiku-4-5-20251001";
+const OCR_CONFIDENCE_THRESHOLD = 65; // below this mean confidence, fall back to GPT-4o-mini
+const OPENAI_MODEL = "gpt-4o-mini";
 
 const SEED_MERCHANTS = {
   "STARBUCKS":"coffee","DUNKIN":"coffee","PEETS":"coffee","BLUE BOTTLE":"coffee",
@@ -258,7 +258,22 @@ function parseReceiptText(text){
       dateISO = `${yr}-${mo.padStart(2,"0")}-${da.padStart(2,"0")}`;
     }
   }
-  return { merchant, total, dateISO };
+  // line items: lines that end with a price and aren't summary/payment lines
+  const itemLineRe = /^(.+?)\s{2,}\$?(\d{1,5}\.\d{2})\s*[FTN]?\s*$/i;
+  const skipLineRe = /\b(total|subtotal|tax|net\s+sales?|qty|paid|visa|mastercard|amex|discover|chip|card|aid|balance|change|cash|tender|discount|savings?|points?|reward|return|refund|receipt|thank|welcome|store|phone|market|square|sold\s+items?|items?\s+sold|coupon|member|loyalty)\b/i;
+  const items = [];
+  for (const line of lines) {
+    if (skipLineRe.test(line)) continue;
+    const m = line.match(itemLineRe);
+    if (m) {
+      const name = m[1].trim().replace(/\s{2,}/g, " ");
+      if (name.length >= 3 && name.length <= 60) {
+        items.push({ name, necessity: tagItemNecessity(name) });
+        if (items.length >= 10) break;
+      }
+    }
+  }
+  return { merchant, total, dateISO, items };
 }
 
 async function runLocalOCR(file, onProgress){
@@ -277,25 +292,23 @@ async function fileToBase64(file){
   });
 }
 
-async function runClaudeOCR(file, knownMerchants){
+async function runOpenAIOCR(file, knownMerchants){
   if (!S.apiKey) throw { code: "no_key", message: "No API key set." };
   const base64 = await fileToBase64(file);
   const catIds = CATEGORIES.map(c=>c.id).join(", ");
   const prompt = `You are reading a photo of a purchase receipt. Reply with ONLY a JSON object:
-{"merchant":string,"date":"YYYY-MM-DD","total":number,"category":one of [${catIds}],"necessity":"essential"|"want"|"junk","items":[{"name":string,"necessity":"essential"|"want"|"junk"},...up to 6]}
+{"merchant":string,"date":"YYYY-MM-DD","total":number,"category":one of [${catIds}],"necessity":"essential"|"want"|"junk","items":[{"name":string,"necessity":"essential"|"want"|"junk"},...up to 10]}
 Necessity: essential=unavoidable (utilities, staple food, medicine, transport to work); want=reasonable but optional (dining, coffee, subscriptions, gym); junk=impulse/wasteful (junk food, snacks, alcohol, splurge entertainment). Apply per item based on what the item actually is. Known merchants: ${JSON.stringify(knownMerchants)}. Today: ${todayISO()}.`;
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-api-key": S.apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true",
+      "authorization": `Bearer ${S.apiKey}`,
     },
     body: JSON.stringify({
-      model: CLAUDE_MODEL, max_tokens: 800,
+      model: OPENAI_MODEL, max_tokens: 800,
       messages: [{ role: "user", content: [
-        { type: "image", source: { type: "base64", media_type: file.type || "image/jpeg", data: base64 } },
+        { type: "image_url", image_url: { url: `data:${file.type||"image/jpeg"};base64,${base64}` } },
         { type: "text", text: prompt },
       ]}],
     }),
@@ -305,9 +318,9 @@ Necessity: essential=unavoidable (utilities, staple food, medicine, transport to
     throw { code: "api_error", message: errBody?.error?.message || `HTTP ${resp.status}` };
   }
   const data = await resp.json();
-  const textBlock = (data.content||[]).find(b => b.type === "text");
-  if (!textBlock) throw { code: "no_text", message: "Empty response." };
-  let jsonStr = textBlock.text.trim();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw { code: "no_text", message: "Empty response." };
+  let jsonStr = text.trim();
   const fenceMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fenceMatch) jsonStr = fenceMatch[1];
   const braceMatch = jsonStr.match(/\{[\s\S]*\}/);
@@ -336,7 +349,7 @@ function necessityDot(t){
 }
 function ocrBadge(t){
   if (t.ocrSource==="on-device") return `<span class="ocr-badge">📱${t.ocrConfidence!=null?" "+t.ocrConfidence+"%":""}</span>`;
-  if (t.ocrSource==="claude") return `<span class="ocr-badge">🤖</span>`;
+  if (t.ocrSource==="gpt") return `<span class="ocr-badge">🤖</span>`;
   return "";
 }
 function buildNecChipRow(containerEl, initialNec, onSelect){
@@ -407,7 +420,7 @@ function renderLock(){
     ${S._needSetup ? `<div class="field"><label>Confirm passphrase</label><input type="password" id="pw2" /></div>` : ""}
     <button class="btn-primary" id="unlockBtn">${S._needSetup ? "Create & unlock" : "Unlock"}</button>
     <div class="err-msg" id="lockErr"></div>
-    <div class="lock-foot">Everything is encrypted (AES-256) and stored only in this browser. Receipt scanning tries on-device OCR first; only if that's not confident does a photo get sent to Claude, using your own API key.</div>
+    <div class="lock-foot">Everything is encrypted (AES-256) and stored only in this browser. Receipt scanning tries on-device OCR first; only if that's not confident does a photo get sent to GPT-4o-mini, using your own OpenAI API key.</div>
   `;
   app.appendChild(wrap);
   document.getElementById("unlockBtn").onclick = handleUnlockClick;
@@ -587,7 +600,7 @@ function renderScanBody(body){
   body.innerHTML = h`
     <div class="drop-zone" id="dropZone"><span class="ic">📸</span>Take a photo or choose a receipt image
       <input type="file" accept="image/*" capture="environment" id="fileInput" /></div>
-    <div class="ai-note"><b>How this works:</b> your device reads the receipt first, entirely offline. Only if that reading looks unreliable does a photo get sent to Claude using your own API key — set one in Settings if you haven't yet.</div>
+    <div class="ai-note"><b>How this works:</b> your device reads the receipt first, entirely offline. Only if that reading looks unreliable does a photo get sent to GPT-4o-mini using your own OpenAI API key — set one in Settings if you haven't yet.</div>
   `;
   body.querySelector("#fileInput").onchange = (e)=>{ const f=e.target.files[0]; if(f) handleScanFile(f, body); };
 }
@@ -614,7 +627,7 @@ async function handleScanFile(file, body){
       dateISO: local.dateISO || todayISO(),
       amount: Math.round(Math.abs(local.total)*100)/100,
       category: dictHit.cat || "other",
-      items: [], via: dictHit.cat ? dictHit.via : "unmatched",
+      items: local.items || [], via: dictHit.cat ? dictHit.via : "unmatched",
       necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
       ocrSource: "on-device", confidence: Math.round(local.confidence),
     });
@@ -623,21 +636,21 @@ async function handleScanFile(file, body){
 
   statusText.textContent = `On-device reading wasn't confident (${Math.round(local.confidence)}%)…`;
   if (!S.apiKey) {
-    body.innerHTML += h`<div class="ai-note warn"><b>Low confidence, no fallback available.</b> Add an Anthropic API key in Settings to enable the AI fallback, or fix the fields below yourself.</div>`;
+    body.innerHTML += h`<div class="ai-note warn"><b>Low confidence, no fallback available.</b> Add an OpenAI API key in Settings to enable the AI fallback, or fix the fields below yourself.</div>`;
     finishScan(body, url, {
       merchant: local.merchant || "", merchantNorm: mNorm,
       dateISO: local.dateISO || todayISO(),
       amount: local.total ? Math.round(Math.abs(local.total)*100)/100 : 0,
-      category: dictHit.cat || "other", items: [], via: "manual-fix-needed",
+      category: dictHit.cat || "other", items: local.items || [], via: "manual-fix-needed",
       necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
       ocrSource: "on-device (low confidence)", confidence: Math.round(local.confidence),
     });
     return;
   }
-  statusText.textContent = "Asking Claude to read it instead…";
+  statusText.textContent = "Asking GPT-4o-mini to read it instead…";
   progFill.style.width = "100%";
   try {
-    const result = await runClaudeOCR(file, S.merchants);
+    const result = await runOpenAIOCR(file, S.merchants);
     const merchant = String(result.merchant || "Unknown").trim();
     const mNorm2 = normMerchant(merchant);
     const dictHit2 = lookupCategory(mNorm2, "");
@@ -648,25 +661,25 @@ async function handleScanFile(file, body){
       category: dictHit2.cat || CAT_MAP[result.category] ? (dictHit2.cat || result.category) : "other",
       items: Array.isArray(result.items) ? result.items.slice(0,6).map(i => typeof i==="string" ? {name:i, necessity:tagItemNecessity(i)} : i) : [],
       necessity: typeof result.necessity==="string" ? result.necessity : CAT_NECESSITY[result.category]||"want",
-      via: dictHit2.cat ? dictHit2.via : "ai", ocrSource: "claude", confidence: null,
+      via: dictHit2.cat ? dictHit2.via : "ai", ocrSource: "gpt", confidence: null,
     });
   } catch(e) {
-    let msg = "Claude couldn't read that receipt either.";
+    let msg = "GPT-4o-mini couldn't read that receipt either.";
     if (e.code === "api_error") msg = "API error: " + esc(e.message);
     body.innerHTML += `<div class="ai-note warn"><b>${msg}</b></div>`;
     finishScan(body, url, {
       merchant: local.merchant || "", merchantNorm: mNorm,
       dateISO: local.dateISO || todayISO(),
       amount: local.total ? Math.round(Math.abs(local.total)*100)/100 : 0,
-      category: dictHit.cat || "other", items: [], via: "manual-fix-needed",
+      category: dictHit.cat || "other", items: local.items || [], via: "manual-fix-needed",
       necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
       ocrSource: "on-device (low confidence)", confidence: Math.round(local.confidence),
     });
   }
 }
 function finishScan(body, imgUrl, r){
-  const sourceNote = r.ocrSource === "claude"
-    ? `<span style="color:var(--moss-bright)">· read by Claude (on-device wasn't confident)</span>`
+  const sourceNote = r.ocrSource === "gpt"
+    ? `<span style="color:var(--moss-bright)">· read by GPT-4o-mini (on-device wasn't confident)</span>`
     : r.confidence !== null ? `<span style="color:var(--text-faint)">· read on-device, ${r.confidence}% confidence</span>` : "";
   body.innerHTML = h`
     <img class="preview-img" src="${imgUrl}" />
@@ -779,10 +792,10 @@ function renderSettings(){
     <div class="settings-row"><div><div class="st-label">Retention</div><div class="st-sub">Detail kept ${DETAIL_RETENTION_MONTHS} months, category totals kept ${ROLLUP_RETENTION_MONTHS} months</div></div></div>
     <div class="settings-row"><div><div class="st-label">Known merchants</div><div class="st-sub">${Object.keys(S.merchants).length} learned + ${Object.keys(SEED_MERCHANTS).length} built-in</div></div></div>
     <div class="section-label">OCR fallback</div>
-    <div class="field"><label>Anthropic API key (used only when on-device OCR isn't confident)</label>
-      <input type="password" id="apiKeyInput" value="${esc(S.apiKey)}" placeholder="sk-ant-..." /></div>
+    <div class="field"><label>OpenAI API key (used only when on-device OCR isn't confident)</label>
+      <input type="password" id="apiKeyInput" value="${esc(S.apiKey)}" placeholder="sk-proj-..." /></div>
     <button class="btn-primary" id="saveKeyBtn">Save key</button>
-    <div class="ai-note">Stored encrypted on this device with the same passphrase as everything else. Sent only to api.anthropic.com, only when a scan's on-device confidence is below ${OCR_CONFIDENCE_THRESHOLD}%.</div>
+    <div class="ai-note">Stored encrypted on this device with the same passphrase as everything else. Sent only to api.openai.com when a scan's on-device confidence is below ${OCR_CONFIDENCE_THRESHOLD}%. Never stored anywhere else.</div>
     <div class="section-label">Backup</div>
     <div class="settings-row"><div><div class="st-label">Export encrypted backup</div><div class="st-sub">A .json file, still encrypted with your passphrase</div></div><button id="exportBtn">Export</button></div>
     <div class="settings-row"><div><div class="st-label">Import backup</div><div class="st-sub">Merges into this device's ledger</div></div>
