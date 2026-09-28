@@ -178,7 +178,16 @@
     var el = document.getElementById("app");
     if (el && !el.hasChildNodes()) showBootError(e.reason && (e.reason.message || String(e.reason)));
   });
+  // Load app.js dynamically so we can catch load failures (network errors / blocked by extension)
+  document.addEventListener("DOMContentLoaded", function() {
+    diag("DOM ready. Loading app.js…");
+    var s = document.createElement("script");
+    s.src = "app.js?" + Date.now(); // cache-bust to avoid stale blocked response
+    s.onerror = function(e) {
+      diag("app.js FAILED TO LOAD — likely blocked by an ad blocker, content blocker, or network error. Try disabling any browser extensions and reload.");
+    };
+    document.body.appendChild(s);
+  });
 </script>
-<script src="app.js" defer></script>
 </body>
 </html>
