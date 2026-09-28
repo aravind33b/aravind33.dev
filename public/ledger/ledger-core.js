@@ -708,8 +708,8 @@ async function handleScanFile(file, body){
 }
 function finishScan(body, imgUrl, r){
   const sourceNote = r.ocrSource === "gpt"
-    ? `<span style="color:var(--moss-bright)">· read by GPT-4o-mini (on-device wasn't confident)</span>`
-    : r.confidence !== null ? `<span style="color:var(--text-faint)">· read on-device, ${r.confidence}% confidence</span>` : "";
+    ? `<span style="color:var(--moss-bright)">· read by GPT-4o-mini</span>`
+    : r.confidence !== null ? `<span style="color:var(--text-faint)">· on-device ${r.confidence}% [build:B7 key:${r._hasApiKey?"yes":"no"} thr:${OCR_CONFIDENCE_THRESHOLD}]</span>` : "";
   body.innerHTML = h`
     <img class="preview-img" src="${imgUrl}" />
     <div class="field"><label>Merchant</label><input type="text" id="fMerchant" value="${esc(r.merchant)}" /></div>
