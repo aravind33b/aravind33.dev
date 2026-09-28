@@ -9,19 +9,20 @@
 <link rel="apple-touch-icon" href="/ledger/icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Work+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Ledger">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#14181A">
+<meta name="theme-color" content="#DB0007">
 <style>
   :root {
-    --ink: #14181A; --ink-raised: #1C2224; --line: #2B332F;
-    --moss: #6C8A6E; --moss-bright: #8AAE8C; --rust: #C06B4C;
-    --text: #EFEDE6; --text-dim: #9BA39D; --text-faint: #6B746E;
+    --ink: #14181A; --ink-raised: #1E1A1C; --line: #2B1A1E;
+    --moss: #8B1A1A; --moss-bright: #DB0007; --rust: #C8A951;
+    --text: #EFEDE6; --text-dim: #9A9090; --text-faint: #6B6060;
     --font-ui: 'Work Sans', system-ui, -apple-system, sans-serif;
     --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
+    --font-display: 'Barlow Condensed', 'Work Sans', system-ui, sans-serif;
     box-sizing: border-box;
   }
   @media (prefers-color-scheme: light) {
@@ -44,8 +45,8 @@
   .mono { font-family: var(--font-mono); }
 
   .lock-wrap { display: flex; flex-direction: column; justify-content: center; min-height: 100%; padding: 32px; }
-  .lock-mark { font-family: var(--font-mono); font-size: 13px; letter-spacing: .08em; color: var(--moss-bright); margin-bottom: 6px; }
-  .lock-title { font-size: 30px; line-height: 1.15; margin-bottom: 8px; font-weight: 700; }
+  .lock-mark { font-family: var(--font-display); font-size: 15px; letter-spacing: .15em; font-weight: 700; color: var(--moss-bright); margin-bottom: 6px; }
+  .lock-title { font-family: var(--font-display); font-size: 30px; line-height: 1.15; margin-bottom: 8px; font-weight: 800; letter-spacing: .01em; }
   .lock-sub { color: var(--text-dim); font-size: 14.5px; line-height: 1.5; margin-bottom: 28px; }
   .lock-sub b { color: var(--text); font-weight: 600; }
   input[type=password],input[type=text],input[type=number],input[type=date] {
@@ -55,14 +56,14 @@
   input:focus { border-color: var(--moss); }
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 12.5px; color: var(--text-dim); margin-bottom: 6px; }
-  .btn-primary { width: 100%; background: var(--moss); color: #0E1210; border: none; padding: 15px; border-radius: 10px; font-size: 15.5px; font-weight: 600; margin-top: 6px; }
+  .btn-primary { width: 100%; background: var(--moss-bright); color: #FFFFFF; border: none; padding: 15px; border-radius: 10px; font-size: 15.5px; font-weight: 600; margin-top: 6px; }
   .btn-primary:disabled { opacity: .5; }
   .btn-ghost { width: 100%; background: transparent; color: var(--text-dim); border: 1px solid var(--line); padding: 13px; border-radius: 10px; font-size: 14.5px; margin-top: 10px; }
   .err-msg { color: var(--rust); font-size: 13.5px; margin-top: 10px; min-height: 18px; }
   .lock-foot { margin-top: 28px; font-size: 12.5px; color: var(--text-faint); line-height: 1.6; }
 
   .topbar { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 6px; }
-  .topbar .mark { font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; color: var(--text-faint); }
+  .topbar .mark { font-family: var(--font-display); font-size: 14px; letter-spacing: .15em; font-weight: 700; color: var(--moss-bright); }
   .topbar button { background: none; border: none; color: var(--text-dim); font-size: 20px; padding: 4px; }
 
   .tabbar { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; background: var(--ink-raised);
@@ -79,7 +80,7 @@
 
   .total-block { margin: 18px 0 22px; }
   .total-label { font-size: 12.5px; color: var(--text-dim); margin-bottom: 4px; }
-  .total-amt { font-family: var(--font-mono); font-size: 42px; font-weight: 700; letter-spacing: -.01em; }
+  .total-amt { font-family: var(--font-display); font-size: 42px; font-weight: 800; letter-spacing: .01em; }
   .total-amt span { color: var(--text-faint); font-size: 24px; }
 
   .section-label { font-size: 12px; color: var(--text-faint); letter-spacing: .03em; margin: 22px 0 10px; }
@@ -106,7 +107,7 @@
   .fab-row { display: flex; gap: 10px; margin-top: 6px; }
   .fab { flex: 1; padding: 15px 10px; border-radius: 12px; border: none; font-size: 14px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .fab .ic { font-size: 20px; }
-  .fab-scan { background: var(--moss); color: #0E1210; }
+  .fab-scan { background: var(--moss-bright); color: #FFFFFF; }
   .fab-quick { background: var(--ink-raised); color: var(--text); border: 1px solid var(--line); }
 
   .flow-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
@@ -151,7 +152,7 @@
   .hidden { display: none !important; }
 
   /* Necessity color tokens */
-  :root { --nec-essential:#8AAE8C; --nec-want:#C0A24C; --nec-junk:#C06B4C; }
+  :root { --nec-essential:#8AAE8C; --nec-want:#C8A951; --nec-junk:#C06B4C; }
 
   /* Home segmented bar */
   .necessity-bar-track { display:flex; gap:2px; height:8px; border-radius:4px; background:var(--line); overflow:hidden; margin:8px 0 14px; }
