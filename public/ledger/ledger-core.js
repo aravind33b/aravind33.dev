@@ -623,7 +623,9 @@ function renderScanBody(body){
   body.innerHTML = h`
     <div class="drop-zone" id="dropZone"><span class="ic">📸</span>Take a photo or choose a receipt image
       <input type="file" accept="image/*" capture="environment" id="fileInput" /></div>
-    <div class="ai-note"><b>How this works:</b> your device reads the receipt first, entirely offline. Only if that reading looks unreliable does a photo get sent to GPT-4o-mini using your own OpenAI API key — set one in Settings if you haven't yet.</div>
+    ${S.apiKey
+      ? `<div class="ai-note"><b>GPT-4o-mini active.</b> Your receipt will be sent to OpenAI for accurate merchant, total, date, and line items.</div>`
+      : `<div class="ai-note warn"><b>No API key set.</b> Go to <b>Settings</b> to add your OpenAI API key — required for line-item extraction.</div>`}
   `;
   body.querySelector("#fileInput").onchange = (e)=>{ const f=e.target.files[0]; if(f) handleScanFile(f, body); };
 }
@@ -818,11 +820,11 @@ function renderSettings(){
     <div class="settings-row"><div><div class="st-label">Storage</div><div class="st-sub">${S.transactions.length} detailed transactions on this device</div></div></div>
     <div class="settings-row"><div><div class="st-label">Retention</div><div class="st-sub">Detail kept ${DETAIL_RETENTION_MONTHS} months, category totals kept ${ROLLUP_RETENTION_MONTHS} months</div></div></div>
     <div class="settings-row"><div><div class="st-label">Known merchants</div><div class="st-sub">${Object.keys(S.merchants).length} learned + ${Object.keys(SEED_MERCHANTS).length} built-in</div></div></div>
-    <div class="section-label">OCR fallback</div>
-    <div class="field"><label>OpenAI API key (used only when on-device OCR isn't confident)</label>
+    <div class="section-label">OpenAI API key</div>
+    <div class="field"><label>API key ${S.apiKey ? `<span style="color:var(--nec-essential)">✓ active</span>` : `<span style="color:var(--err)">not set — items won't be extracted</span>`}</label>
       <input type="password" id="apiKeyInput" value="${esc(S.apiKey)}" placeholder="sk-proj-..." /></div>
     <button class="btn-primary" id="saveKeyBtn">Save key</button>
-    <div class="ai-note">Stored encrypted on this device with the same passphrase as everything else. Sent only to api.openai.com when a scan's on-device confidence is below ${OCR_CONFIDENCE_THRESHOLD}%. Never stored anywhere else.</div>
+    <div class="ai-note">When set, every receipt scan uses GPT-4o-mini — better merchant names, correct line items with E/W/J tags. Stored encrypted with your passphrase. Never sent anywhere except api.openai.com.</div>
     <div class="section-label">Backup</div>
     <div class="settings-row"><div><div class="st-label">Export encrypted backup</div><div class="st-sub">A .json file, still encrypted with your passphrase</div></div><button id="exportBtn">Export</button></div>
     <div class="settings-row"><div><div class="st-label">Import backup</div><div class="st-sub">Merges into this device's ledger</div></div>
