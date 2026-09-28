@@ -258,20 +258,43 @@ function parseReceiptText(text){
       dateISO = `${yr}-${mo.padStart(2,"0")}-${da.padStart(2,"0")}`;
     }
   }
-  // line items: lines that end with a price and aren't summary/payment lines
+  // line items — handles two OCR layouts:
+  //   same-line:  "ITEM NAME   $4.19 F"
+  //   split-line: "ITEM NAME" on one line, "$4.19 F" on the next
   const priceAtEndRe = /^(.+?)\s+\$?(\d{1,5}\.\d{2})\s*[A-Z]?\s*$/i;
-  const skipLineRe = /\b(total|subtotal|tax|net\s+sales?|qty|each|ea\b|paid|visa|mastercard|amex|discover|chip|card|aid|balance|change|cash|tender|discount|savings?|points?|reward|return|refund|receipt|thank|welcome|store|phone|market|square|sold\s+items?|items?\s+sold|coupon|member|loyalty|address|street|ave|blvd)\b/i;
+  const priceOnlyRe  = /^\$?(\d{1,5}\.\d{2})\s*[A-Z]?\s*$/;
+  const skipLineRe   = /\b(total|subtotal|tax|net\s+sales?|qty|each|\bea\b|paid|visa|mastercard|amex|discover|chip|card|aid|balance|change|cash|tender|discount|savings?|points?|reward|return|refund|receipt|thank|welcome|store|phone|market|square|sold\s+items?|items?\s+sold|coupon|member|loyalty|\bst\b|\bave\b|\bblvd\b)\b/i;
   const items = [];
+  let prevDesc = null;
   for (const line of lines) {
-    if (skipLineRe.test(line)) continue;
-    const m = line.match(priceAtEndRe);
-    if (m) {
-      const name = m[1].trim().replace(/\s+/g, " ");
-      if (name.length >= 3 && name.length <= 60 && !/^\d+$/.test(name)) {
-        items.push({ name, necessity: tagItemNecessity(name) });
-        if (items.length >= 10) break;
+    const skip = skipLineRe.test(line);
+
+    if (!skip) {
+      // same-line: "DESCRIPTION $X.XX [F]"
+      const m = line.match(priceAtEndRe);
+      if (m) {
+        const name = m[1].trim().replace(/\s+/g, " ");
+        if (name.length >= 3 && name.length <= 60 && !/^\d+$/.test(name)) {
+          items.push({ name, necessity: tagItemNecessity(name) });
+          prevDesc = null;
+          if (items.length >= 10) break;
+          continue;
+        }
       }
     }
+
+    // split-line: previous line was description, this line is "$X.XX [F]"
+    if (prevDesc && priceOnlyRe.test(line)) {
+      items.push({ name: prevDesc, necessity: tagItemNecessity(prevDesc) });
+      prevDesc = null;
+      if (items.length >= 10) break;
+      continue;
+    }
+
+    // store as candidate description for the next line
+    prevDesc = (!skip && line.length >= 3 && line.length <= 60 && !/^[\d\s$.,:\-#*()]+$/.test(line))
+      ? line.trim().replace(/\s+/g, " ")
+      : null;
   }
   return { merchant, total, dateISO, items };
 }
