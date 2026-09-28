@@ -259,15 +259,15 @@ function parseReceiptText(text){
     }
   }
   // line items: lines that end with a price and aren't summary/payment lines
-  const itemLineRe = /^(.+?)\s{2,}\$?(\d{1,5}\.\d{2})\s*[FTN]?\s*$/i;
-  const skipLineRe = /\b(total|subtotal|tax|net\s+sales?|qty|paid|visa|mastercard|amex|discover|chip|card|aid|balance|change|cash|tender|discount|savings?|points?|reward|return|refund|receipt|thank|welcome|store|phone|market|square|sold\s+items?|items?\s+sold|coupon|member|loyalty)\b/i;
+  const priceAtEndRe = /^(.+?)\s+\$?(\d{1,5}\.\d{2})\s*[A-Z]?\s*$/i;
+  const skipLineRe = /\b(total|subtotal|tax|net\s+sales?|qty|each|ea\b|paid|visa|mastercard|amex|discover|chip|card|aid|balance|change|cash|tender|discount|savings?|points?|reward|return|refund|receipt|thank|welcome|store|phone|market|square|sold\s+items?|items?\s+sold|coupon|member|loyalty|address|street|ave|blvd)\b/i;
   const items = [];
   for (const line of lines) {
     if (skipLineRe.test(line)) continue;
-    const m = line.match(itemLineRe);
+    const m = line.match(priceAtEndRe);
     if (m) {
-      const name = m[1].trim().replace(/\s{2,}/g, " ");
-      if (name.length >= 3 && name.length <= 60) {
+      const name = m[1].trim().replace(/\s+/g, " ");
+      if (name.length >= 3 && name.length <= 60 && !/^\d+$/.test(name)) {
         items.push({ name, necessity: tagItemNecessity(name) });
         if (items.length >= 10) break;
       }
