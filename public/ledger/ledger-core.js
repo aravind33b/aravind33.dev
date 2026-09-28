@@ -653,6 +653,7 @@ async function handleScanFile(file, body){
       items: local.items || [], via: dictHit.cat ? dictHit.via : "unmatched",
       necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
       ocrSource: "on-device", confidence: Math.round(local.confidence),
+      _rawText: local.text,
     });
     return;
   }
@@ -667,6 +668,7 @@ async function handleScanFile(file, body){
       category: dictHit.cat || "other", items: local.items || [], via: "manual-fix-needed",
       necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
       ocrSource: "on-device (low confidence)", confidence: Math.round(local.confidence),
+      _rawText: local.text,
     });
     return;
   }
@@ -711,7 +713,7 @@ function finishScan(body, imgUrl, r){
     <div class="field"><label>Date</label><input type="date" id="fDate" value="${r.dateISO}" /></div>
     <div class="field"><label>Category ${sourceNote}</label><div class="chip-row" id="catChips"></div></div>
     <div class="field"><label>Necessity</label><div class="chip-row" id="necChips"></div></div>
-    ${r.items&&r.items.length>0 ? `<div class="field"><label>Items</label><div id="itemsList"></div></div>` : ""}
+    ${r.items&&r.items.length>0 ? `<div class="field"><label>Items</label><div id="itemsList"></div></div>` : `<div class="field"><div class="ai-note" id="debugOcr" style="font-size:11px;word-break:break-all;max-height:120px;overflow:auto"></div></div>`}
     <button class="btn-primary" id="saveTxBtn">Save expense</button>
   `;
   const chipRow = body.querySelector("#catChips");
@@ -734,6 +736,8 @@ function finishScan(body, imgUrl, r){
   buildNecChipRow(necContainer, r.necessity||CAT_NECESSITY[r.category]||"want", nec => { r.necessity=nec; });
   const itemsEl = body.querySelector("#itemsList");
   if (itemsEl) renderItemNecToggles(itemsEl, r.items);
+  const dbgEl = body.querySelector("#debugOcr");
+  if (dbgEl) dbgEl.textContent = "v4 · raw OCR: " + (r._rawText || "(none)");
   body.querySelector("#saveTxBtn").onclick = async ()=>{
     const merchant = body.querySelector("#fMerchant").value.trim() || "Unknown";
     const amount = Math.round(Math.abs(Number(body.querySelector("#fAmount").value)||0)*100)/100;
