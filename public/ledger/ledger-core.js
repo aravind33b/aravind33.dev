@@ -642,7 +642,9 @@ async function handleScanFile(file, body){
   }
   const mNorm = normMerchant(local.merchant);
   const dictHit = lookupCategory(mNorm, local.text);
-  const needsFallback = local.confidence < OCR_CONFIDENCE_THRESHOLD || !local.merchant || local.total === null;
+  // With an API key, always use GPT — better merchant name, date, items.
+  // Without one, fall back only when on-device confidence is low.
+  const needsFallback = !!S.apiKey || local.confidence < OCR_CONFIDENCE_THRESHOLD || !local.merchant || local.total === null;
 
   if (!needsFallback) {
     finishScan(body, url, {
