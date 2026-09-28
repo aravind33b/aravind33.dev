@@ -15,8 +15,29 @@ const CATEGORIES = [
   { id: "travel", name: "Travel", color: "#5B9BC0", icon: "✈️" },
   { id: "subscriptions", name: "Subscriptions", color: "#C0A24C", icon: "🔁" },
   { id: "other", name: "Other", color: "#8B948C", icon: "•" },
+  { id: "rent", name: "Rent", color: "#7B9CC0", icon: "🏠" },
+  { id: "personal_care", name: "Personal Care", color: "#C08BAA", icon: "🧴" },
+  { id: "fitness", name: "Fitness", color: "#7BC0A0", icon: "💪" },
+  { id: "alcohol", name: "Alcohol", color: "#C0A46E", icon: "🍺" },
+  { id: "education", name: "Education", color: "#9EC07B", icon: "📚" },
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
+const CAT_NECESSITY = {
+  groceries:"essential", dining:"want", coffee:"want", shopping:"want",
+  transport:"essential", gas:"essential", utilities:"essential", health:"essential",
+  entertainment:"junk", travel:"want", subscriptions:"want", other:"want",
+  rent:"essential", personal_care:"want", fitness:"want", alcohol:"junk", education:"essential",
+};
+const JUNK_FOOD_KEYWORDS = [
+  "chips","fries","nachos","popcorn","donut","doughnut","cookie","candy",
+  "soda","cola","pepsi","sprite","redbull","monster","energy drink",
+  "hot dog","corn dog","churro","milkshake","ice cream","slurpee","gummy",
+  "snickers","twix","kit kat","doritos","cheetos","pringles","oreo","skittles",
+  "m&m","lays","cheez-it","beer","wine","liquor","whiskey","vodka","rum","tequila",
+];
+const JUNK_FOOD_RE = new RegExp(
+  JUNK_FOOD_KEYWORDS.map(k => k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'), 'i'
+);
 const DETAIL_RETENTION_MONTHS = 6;
 const ROLLUP_RETENTION_MONTHS = 24;
 const OCR_CONFIDENCE_THRESHOLD = 65; // below this mean confidence, fall back to Claude
@@ -116,6 +137,11 @@ function lookupCategory(mNorm, rawText){
   for (const rule of KEYWORD_RULES) if (rule.re.test(hay)) return { cat: rule.cat, via: "keyword" };
   return { cat: null, via: null };
 }
+function tagItemNecessity(name){ return JUNK_FOOD_RE.test(name||"") ? "junk" : "want"; }
+function normalizeItems(items){
+  if (!Array.isArray(items)) return [];
+  return items.map(i => typeof i==="string" ? {name:i, necessity:tagItemNecessity(i)} : i);
+}
 function bumpRollup(mk, catId, delta, deltaCount){
   const k = mk+"|"+catId;
   const row = S.rollups[k] || { total:0, count:0 };
@@ -132,6 +158,10 @@ async function persistAll(){
 }
 function addTransaction(t){
   t.id = "t"+Date.now()+Math.random().toString(36).slice(2,7);
+  t.items = normalizeItems(t.items);
+  if (!t.necessity) t.necessity = CAT_NECESSITY[t.category] || "want";
+  if (t.ocrSource===undefined) t.ocrSource = t.source==="manual" ? "manual" : null;
+  if (t.ocrConfidence===undefined) t.ocrConfidence = null;
   S.transactions.push(t);
   bumpRollup(monthKey(t.dateISO), t.category, t.amount, 1);
   if (t.merchantNorm && !S.merchants[t.merchantNorm]) S.merchants[t.merchantNorm] = t.category;
@@ -143,6 +173,9 @@ function updateTransactionCategory(id, cat){
   t.category = cat;
   bumpRollup(monthKey(t.dateISO), cat, t.amount, 1);
   if (t.merchantNorm) S.merchants[t.merchantNorm] = cat;
+}
+function updateNecessity(id, necessity){
+  const t = S.transactions.find(x=>x.id===id); if(t) t.necessity=necessity;
 }
 function deleteTransaction(id){
   const i = S.transactions.findIndex(x=>x.id===id); if(i<0) return;
@@ -249,8 +282,8 @@ async function runClaudeOCR(file, knownMerchants){
   const base64 = await fileToBase64(file);
   const catIds = CATEGORIES.map(c=>c.id).join(", ");
   const prompt = `You are reading a photo of a purchase receipt. Reply with ONLY a JSON object:
-{"merchant": string, "date": "YYYY-MM-DD", "total": number, "category": one of [${catIds}], "items": [short strings, up to 6]}
-If the merchant matches one of these already-known merchants, use that exact known category: ${JSON.stringify(knownMerchants)}. Otherwise pick your best-fit category. Today's date is ${todayISO()}.`;
+{"merchant":string,"date":"YYYY-MM-DD","total":number,"category":one of [${catIds}],"necessity":"essential"|"want"|"junk","items":[{"name":string,"necessity":"essential"|"want"|"junk"},...up to 6]}
+Necessity: essential=unavoidable (utilities, staple food, medicine, transport to work); want=reasonable but optional (dining, coffee, subscriptions, gym); junk=impulse/wasteful (junk food, snacks, alcohol, splurge entertainment). Apply per item based on what the item actually is. Known merchants: ${JSON.stringify(knownMerchants)}. Today: ${todayISO()}.`;
   const resp = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -260,7 +293,7 @@ If the merchant matches one of these already-known merchants, use that exact kno
       "anthropic-dangerous-direct-browser-access": "true",
     },
     body: JSON.stringify({
-      model: CLAUDE_MODEL, max_tokens: 500,
+      model: CLAUDE_MODEL, max_tokens: 800,
       messages: [{ role: "user", content: [
         { type: "image", source: { type: "base64", media_type: file.type || "image/jpeg", data: base64 } },
         { type: "text", text: prompt },
@@ -295,6 +328,56 @@ function toast(msg){
 }
 function h(strings, ...vals){ return strings.reduce((a,s,i)=>a+s+(vals[i]!==undefined?vals[i]:""),""); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function necessityDot(t){
+  const n = t.necessity || CAT_NECESSITY[t.category] || "want";
+  if (n==="want") return "";
+  return `<span class="nec-badge nec-${n}" title="${n}">●</span>`;
+}
+function ocrBadge(t){
+  if (t.ocrSource==="on-device") return `<span class="ocr-badge">📱${t.ocrConfidence!=null?" "+t.ocrConfidence+"%":""}</span>`;
+  if (t.ocrSource==="claude") return `<span class="ocr-badge">🤖</span>`;
+  return "";
+}
+function buildNecChipRow(containerEl, initialNec, onSelect){
+  const opts = [{id:"essential",label:"Essential ✓"},{id:"want",label:"Want ○"},{id:"junk",label:"Junk ✗"}];
+  let current = initialNec;
+  opts.forEach(opt => {
+    const b = document.createElement("button"); b.type="button"; b.dataset.nec=opt.id;
+    b.className = "nec-chip-btn"+(opt.id===initialNec?" sel-"+opt.id:"");
+    b.textContent = opt.label;
+    b.onclick = () => {
+      current=opt.id;
+      containerEl.querySelectorAll(".nec-chip-btn").forEach(x=>x.className="nec-chip-btn");
+      b.className="nec-chip-btn sel-"+opt.id;
+      if(onSelect) onSelect(opt.id);
+    };
+    containerEl.appendChild(b);
+  });
+  return () => current;
+}
+function renderItemNecToggles(containerEl, items){
+  containerEl.innerHTML = "";
+  items.forEach((item, idx) => {
+    const row = document.createElement("div"); row.className="item-row";
+    const nameEl = document.createElement("span"); nameEl.className="item-name"; nameEl.textContent=item.name;
+    const toggle = document.createElement("div"); toggle.className="item-nec-toggle";
+    ["E","W","J"].forEach((label,i) => {
+      const nec = ["essential","want","junk"][i];
+      const btn = document.createElement("button"); btn.type="button";
+      btn.className="nec-mini-btn"+(item.necessity===nec?" sel-"+nec:"");
+      btn.textContent=label;
+      btn.onclick=()=>{
+        items[idx].necessity=nec;
+        toggle.querySelectorAll(".nec-mini-btn").forEach(x=>x.className="nec-mini-btn");
+        btn.className="nec-mini-btn sel-"+nec;
+      };
+      toggle.appendChild(btn);
+    });
+    row.appendChild(nameEl); row.appendChild(toggle);
+    containerEl.appendChild(row);
+  });
+}
 
 /* ============================== SCREENS ============================== */
 
@@ -385,6 +468,13 @@ function renderHome(){
   const catTotals = {}; let grand = 0;
   CATEGORIES.forEach(c=>{ const row=S.rollups[mk+"|"+c.id]; if(row && row.total>0){ catTotals[c.id]=row.total; grand+=row.total; } });
   const sortedCats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+  const necTotals = {essential:0, want:0, junk:0};
+  monthTx.forEach(t => {
+    const n = t.necessity || CAT_NECESSITY[t.category] || "want";
+    necTotals[n] = Math.round((necTotals[n]+t.amount)*100)/100;
+  });
+  const necGrand = necTotals.essential+necTotals.want+necTotals.junk;
+  const necPct = k => necGrand>0 ? Math.round((necTotals[k]/necGrand)*100) : 0;
   el.innerHTML = h`
     <div class="topbar"><div class="mark">LEDGER</div><button id="lockNowBtn" title="Lock">🔒</button></div>
     <div class="month-row"><div class="month-nav"><button id="prevMonth">‹</button><span class="month-label">${fmtMonthLabel(mk)}</span><button id="nextMonth">›</button></div></div>
@@ -395,6 +485,17 @@ function renderHome(){
       <button class="fab fab-quick" id="goQuick"><span class="ic">✎</span>Quick add</button>
     </div>
     <div class="section-label">By category</div><div id="catList"></div>
+    <div class="section-label">By necessity</div>
+    <div class="necessity-bar-track">
+      <div class="necessity-bar-seg necessity-essential" style="width:${necPct("essential")}%"></div>
+      <div class="necessity-bar-seg necessity-want"      style="width:${necPct("want")}%"></div>
+      <div class="necessity-bar-seg necessity-junk"      style="width:${necPct("junk")}%"></div>
+    </div>
+    <div class="necessity-stats">
+      <div class="necessity-stat"><span class="necessity-stat-amt" style="color:var(--nec-essential)">${fmtMoney(necTotals.essential)}</span><span class="necessity-stat-label">Essential</span></div>
+      <div class="necessity-stat"><span class="necessity-stat-amt" style="color:var(--nec-want)">${fmtMoney(necTotals.want)}</span><span class="necessity-stat-label">Want</span></div>
+      <div class="necessity-stat"><span class="necessity-stat-amt" style="color:var(--nec-junk)">${fmtMoney(necTotals.junk)}</span><span class="necessity-stat-label">Junk</span></div>
+    </div>
     <div class="section-label">Transactions this month</div><div id="txList"></div>
   `;
   const catListEl = el.querySelector("#catList");
@@ -415,7 +516,7 @@ function renderHome(){
     const row = document.createElement("div"); row.className="tx-row";
     row.innerHTML = h`<div class="tx-cat-chip" style="background:${c.color}22;color:${c.color}">${c.icon}</div>
       <div class="tx-main"><div class="tx-merchant">${esc(t.merchant||"Unnamed")}</div>
-      <div class="tx-meta">${c.name} · ${new Date(t.dateISO).toLocaleDateString(undefined,{month:"short",day:"numeric"})}</div></div>
+      <div class="tx-meta">${c.name} · ${new Date(t.dateISO).toLocaleDateString(undefined,{month:"short",day:"numeric"})}${necessityDot(t)}${ocrBadge(t)}</div></div>
       <div class="tx-amt">${fmtMoney(t.amount)}</div>`;
     row.onclick = ()=> openTxEditor(t.id);
     txListEl.appendChild(row);
@@ -435,21 +536,39 @@ function lockNow(){ S.key=null; S.transactions=[]; S.rollups={}; S.merchants={};
 function openTxEditor(id){
   const t = S.transactions.find(x=>x.id===id); if(!t) return;
   const overlay = document.createElement("div"); overlay.className="modal-overlay";
+  const items = normalizeItems(t.items);
   overlay.innerHTML = h`<div class="modal-sheet"><h3>${esc(t.merchant||"Transaction")}</h3>
     <div class="field"><label>Amount</label><div class="mono" style="font-size:20px">${fmtMoney(t.amount)}</div></div>
     <div class="field"><label>Category</label><div class="chip-row" id="editCatChips"></div></div>
+    <div class="field"><label>Necessity</label><div class="chip-row" id="editNecChips"></div></div>
+    ${items.length>0 ? `<div class="field"><label>Items</label><div id="editItemsList"></div></div>` : ""}
     <button class="btn-primary" id="closeEdit">Done</button>
     <button class="btn-ghost" id="deleteTx" style="color:var(--rust);border-color:var(--rust)">Delete transaction</button></div>`;
   document.body.appendChild(overlay);
   const chipRow = overlay.querySelector("#editCatChips");
+  let pendingNec = t.necessity || CAT_NECESSITY[t.category] || "want";
+  const necContainer = overlay.querySelector("#editNecChips");
+  buildNecChipRow(necContainer, pendingNec, nec => { pendingNec=nec; });
+  const editItemsEl = overlay.querySelector("#editItemsList");
+  if (editItemsEl) { renderItemNecToggles(editItemsEl, items); editItemsEl._items=items; }
   CATEGORIES.forEach(c=>{
     const b = document.createElement("button");
     b.className = "cat-chip-btn"+(t.category===c.id?" sel":"");
     b.innerHTML = `${c.icon} ${c.name}`;
-    b.onclick = async ()=>{ updateTransactionCategory(t.id,c.id); await persistAll(); document.body.removeChild(overlay); render(); };
+    b.onclick = async ()=>{
+      updateTransactionCategory(t.id,c.id);
+      const autoNec = CAT_NECESSITY[c.id]||"want";
+      pendingNec=autoNec;
+      necContainer.querySelectorAll(".nec-chip-btn").forEach(x=>x.className="nec-chip-btn");
+      necContainer.querySelector(`[data-nec="${autoNec}"]`)?.classList.add("sel-"+autoNec);
+    };
     chipRow.appendChild(b);
   });
-  overlay.querySelector("#closeEdit").onclick = ()=> document.body.removeChild(overlay);
+  overlay.querySelector("#closeEdit").onclick = async ()=>{
+    updateNecessity(t.id, pendingNec);
+    if (editItemsEl) t.items = editItemsEl._items;
+    await persistAll(); document.body.removeChild(overlay); render();
+  };
   overlay.querySelector("#deleteTx").onclick = async ()=>{ deleteTransaction(t.id); await persistAll(); document.body.removeChild(overlay); render(); toast("Transaction deleted."); };
   overlay.onclick = (e)=>{ if(e.target===overlay) document.body.removeChild(overlay); };
 }
@@ -496,6 +615,7 @@ async function handleScanFile(file, body){
       amount: Math.round(Math.abs(local.total)*100)/100,
       category: dictHit.cat || "other",
       items: [], via: dictHit.cat ? dictHit.via : "unmatched",
+      necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
       ocrSource: "on-device", confidence: Math.round(local.confidence),
     });
     return;
@@ -509,6 +629,7 @@ async function handleScanFile(file, body){
       dateISO: local.dateISO || todayISO(),
       amount: local.total ? Math.round(Math.abs(local.total)*100)/100 : 0,
       category: dictHit.cat || "other", items: [], via: "manual-fix-needed",
+      necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
       ocrSource: "on-device (low confidence)", confidence: Math.round(local.confidence),
     });
     return;
@@ -525,7 +646,8 @@ async function handleScanFile(file, body){
       dateISO: /^\d{4}-\d{2}-\d{2}$/.test(result.date) ? result.date : todayISO(),
       amount: Math.round(Math.abs(Number(result.total)||0)*100)/100,
       category: dictHit2.cat || CAT_MAP[result.category] ? (dictHit2.cat || result.category) : "other",
-      items: Array.isArray(result.items) ? result.items.slice(0,6) : [],
+      items: Array.isArray(result.items) ? result.items.slice(0,6).map(i => typeof i==="string" ? {name:i, necessity:tagItemNecessity(i)} : i) : [],
+      necessity: typeof result.necessity==="string" ? result.necessity : CAT_NECESSITY[result.category]||"want",
       via: dictHit2.cat ? dictHit2.via : "ai", ocrSource: "claude", confidence: null,
     });
   } catch(e) {
@@ -537,6 +659,7 @@ async function handleScanFile(file, body){
       dateISO: local.dateISO || todayISO(),
       amount: local.total ? Math.round(Math.abs(local.total)*100)/100 : 0,
       category: dictHit.cat || "other", items: [], via: "manual-fix-needed",
+      necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
       ocrSource: "on-device (low confidence)", confidence: Math.round(local.confidence),
     });
   }
@@ -551,6 +674,8 @@ function finishScan(body, imgUrl, r){
     <div class="field"><label>Amount</label><input type="number" step="0.01" id="fAmount" value="${r.amount}" /></div>
     <div class="field"><label>Date</label><input type="date" id="fDate" value="${r.dateISO}" /></div>
     <div class="field"><label>Category ${sourceNote}</label><div class="chip-row" id="catChips"></div></div>
+    <div class="field"><label>Necessity</label><div class="chip-row" id="necChips"></div></div>
+    ${r.items&&r.items.length>0 ? `<div class="field"><label>Items</label><div id="itemsList"></div></div>` : ""}
     <button class="btn-primary" id="saveTxBtn">Save expense</button>
   `;
   const chipRow = body.querySelector("#catChips");
@@ -558,14 +683,28 @@ function finishScan(body, imgUrl, r){
     const b = document.createElement("button"); b.type="button";
     b.className = "cat-chip-btn"+(r.category===c.id?" sel":"");
     b.innerHTML = `${c.icon} ${c.name}`;
-    b.onclick = ()=>{ r.category=c.id; chipRow.querySelectorAll(".cat-chip-btn").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); };
+    b.onclick = ()=>{
+      r.category=c.id;
+      chipRow.querySelectorAll(".cat-chip-btn").forEach(x=>x.classList.remove("sel")); b.classList.add("sel");
+      const autoNec = CAT_NECESSITY[c.id]||"want";
+      r.necessity=autoNec;
+      const nc = body.querySelector("#necChips");
+      nc.querySelectorAll(".nec-chip-btn").forEach(x=>x.className="nec-chip-btn");
+      nc.querySelector(`[data-nec="${autoNec}"]`)?.classList.add("sel-"+autoNec);
+    };
     chipRow.appendChild(b);
   });
+  const necContainer = body.querySelector("#necChips");
+  buildNecChipRow(necContainer, r.necessity||CAT_NECESSITY[r.category]||"want", nec => { r.necessity=nec; });
+  const itemsEl = body.querySelector("#itemsList");
+  if (itemsEl) renderItemNecToggles(itemsEl, r.items);
   body.querySelector("#saveTxBtn").onclick = async ()=>{
     const merchant = body.querySelector("#fMerchant").value.trim() || "Unknown";
     const amount = Math.round(Math.abs(Number(body.querySelector("#fAmount").value)||0)*100)/100;
     const dateISO = body.querySelector("#fDate").value || todayISO();
-    addTransaction({ merchant, merchantNorm: normMerchant(merchant), amount, dateISO, category: r.category, items: r.items, note:"", source:"scan" });
+    addTransaction({ merchant, merchantNorm: normMerchant(merchant), amount, dateISO, category: r.category, items: r.items, note:"", source:"scan",
+      necessity: r.necessity||CAT_NECESSITY[r.category]||"want",
+      ocrSource: r.ocrSource, ocrConfidence: r.confidence??null });
     await persistAll();
     S.route = "home"; S.viewMonth = monthKey(dateISO);
     render(); toast(`Saved ${fmtMoney(amount)} · ${CAT_MAP[r.category].name}`);
@@ -581,23 +720,38 @@ function renderQuickAdd(){
     <div class="field"><label>Amount</label><input type="number" step="0.01" id="qAmount" placeholder="0.00" /></div>
     <div class="field"><label>Date</label><input type="date" id="qDate" value="${todayISO()}" /></div>
     <div class="field"><label>Category</label><div class="chip-row" id="qChips"></div></div>
+    <div class="field"><label>Necessity</label><div class="chip-row" id="qNecChips"></div></div>
     <button class="btn-primary" id="qSaveBtn">Save expense</button>`;
   setTimeout(()=>{
     el.querySelector("#backBtn").onclick = ()=>{ S.route="home"; render(); };
     let selectedCat = null;
+    let selectedNec = "want";
     const chipRow = el.querySelector("#qChips");
+    const necChipRow = el.querySelector("#qNecChips");
+    buildNecChipRow(necChipRow, "want", nec => { selectedNec=nec; });
+    const setNec = (nec) => {
+      selectedNec=nec;
+      necChipRow.querySelectorAll(".nec-chip-btn").forEach(x=>x.className="nec-chip-btn");
+      necChipRow.querySelector(`[data-nec="${nec}"]`)?.classList.add("sel-"+nec);
+    };
     CATEGORIES.forEach(c=>{
       const b = document.createElement("button"); b.type="button"; b.className="cat-chip-btn";
       b.innerHTML = `${c.icon} ${c.name}`;
-      b.onclick = ()=>{ selectedCat=c.id; chipRow.querySelectorAll(".cat-chip-btn").forEach(x=>x.classList.remove("sel")); b.classList.add("sel"); };
+      b.onclick = ()=>{
+        selectedCat=c.id;
+        chipRow.querySelectorAll(".cat-chip-btn").forEach(x=>x.classList.remove("sel")); b.classList.add("sel");
+        setNec(CAT_NECESSITY[c.id]||"want");
+      };
       chipRow.appendChild(b);
     });
     const merchantInput = el.querySelector("#qMerchant");
     merchantInput.addEventListener("blur", ()=>{
       if (selectedCat) return;
       const guess = lookupCategory(normMerchant(merchantInput.value), "");
-      if (guess.cat) { selectedCat = guess.cat;
+      if (guess.cat) {
+        selectedCat = guess.cat;
         chipRow.querySelectorAll(".cat-chip-btn").forEach(x=>{ if (x.textContent.includes(CAT_MAP[guess.cat].name)) x.classList.add("sel"); });
+        setNec(CAT_NECESSITY[guess.cat]||"want");
       }
     });
     el.querySelector("#qSaveBtn").onclick = async ()=>{
@@ -606,7 +760,8 @@ function renderQuickAdd(){
       const dateISO = el.querySelector("#qDate").value || todayISO();
       if (!merchant || amount<=0) { toast("Enter a merchant and an amount."); return; }
       const cat = selectedCat || lookupCategory(normMerchant(merchant),"").cat || "other";
-      addTransaction({ merchant, merchantNorm: normMerchant(merchant), amount, dateISO, category: cat, items:[], note:"", source:"manual" });
+      addTransaction({ merchant, merchantNorm: normMerchant(merchant), amount, dateISO, category: cat, items:[], note:"", source:"manual",
+        necessity: selectedNec, ocrSource: "manual", ocrConfidence: null });
       await persistAll();
       S.route = "home"; S.viewMonth = monthKey(dateISO);
       render(); toast(`Saved ${fmtMoney(amount)} · ${CAT_MAP[cat].name}`);
