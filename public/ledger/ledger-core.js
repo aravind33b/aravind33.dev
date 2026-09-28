@@ -737,7 +737,7 @@ function finishScan(body, imgUrl, r){
   const itemsEl = body.querySelector("#itemsList");
   if (itemsEl) renderItemNecToggles(itemsEl, r.items);
   const dbgEl = body.querySelector("#debugOcr");
-  if (dbgEl) dbgEl.textContent = "v4 · raw OCR: " + (r._rawText || "(none)");
+  if (dbgEl) dbgEl.textContent = "v5(threshold=85) · raw OCR: " + (r._rawText || "(none)");
   body.querySelector("#saveTxBtn").onclick = async ()=>{
     const merchant = body.querySelector("#fMerchant").value.trim() || "Unknown";
     const amount = Math.round(Math.abs(Number(body.querySelector("#fAmount").value)||0)*100)/100;
