@@ -261,8 +261,8 @@ function parseReceiptText(text){
   // line items — handles two OCR layouts:
   //   same-line:  "ITEM NAME   $4.19 F"
   //   split-line: "ITEM NAME" on one line, "$4.19 F" on the next
-  const priceAtEndRe = /^(.+?)\s+\$?(\d{1,5}\.\d{2})\s*[A-Z]?\s*$/i;
-  const priceOnlyRe  = /^\$?(\d{1,5}\.\d{2})\s*[A-Z]?\s*$/;
+  const priceAtEndRe = /^(.+?)\s+\$?(\d{1,5}[.,]\d{2})\s*\S?\s*$/i;
+  const priceOnlyRe  = /^\$?(\d{1,5}[.,]\d{2})\s*\S?\s*$/;
   const skipLineRe   = /\b(total|subtotal|tax|net\s+sales?|qty|each|\bea\b|paid|visa|mastercard|amex|discover|chip|card|aid|balance|change|cash|tender|discount|savings?|points?|reward|return|refund|receipt|thank|welcome|store|phone|market|square|sold\s+items?|items?\s+sold|coupon|member|loyalty|\bst\b|\bave\b|\bblvd\b)\b/i;
   const items = [];
   let prevDesc = null;
@@ -653,7 +653,7 @@ async function handleScanFile(file, body){
       items: local.items || [], via: dictHit.cat ? dictHit.via : "unmatched",
       necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
       ocrSource: "on-device", confidence: Math.round(local.confidence),
-      _rawText: local.text,
+      _hasApiKey: !!S.apiKey,
     });
     return;
   }
@@ -668,7 +668,7 @@ async function handleScanFile(file, body){
       category: dictHit.cat || "other", items: local.items || [], via: "manual-fix-needed",
       necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
       ocrSource: "on-device (low confidence)", confidence: Math.round(local.confidence),
-      _rawText: local.text,
+      _hasApiKey: false,
     });
     return;
   }
@@ -713,7 +713,7 @@ function finishScan(body, imgUrl, r){
     <div class="field"><label>Date</label><input type="date" id="fDate" value="${r.dateISO}" /></div>
     <div class="field"><label>Category ${sourceNote}</label><div class="chip-row" id="catChips"></div></div>
     <div class="field"><label>Necessity</label><div class="chip-row" id="necChips"></div></div>
-    ${r.items&&r.items.length>0 ? `<div class="field"><label>Items</label><div id="itemsList"></div></div>` : `<div class="field"><div class="ai-note" id="debugOcr" style="font-size:11px;word-break:break-all;max-height:120px;overflow:auto"></div></div>`}
+    ${r.items&&r.items.length>0 ? `<div class="field"><label>Items</label><div id="itemsList"></div></div>` : (!r._hasApiKey ? `<div class="field"><div class="ai-note">Add an OpenAI API key in <b>Settings</b> to extract individual line items.</div></div>` : "")}
     <button class="btn-primary" id="saveTxBtn">Save expense</button>
   `;
   const chipRow = body.querySelector("#catChips");
@@ -736,8 +736,6 @@ function finishScan(body, imgUrl, r){
   buildNecChipRow(necContainer, r.necessity||CAT_NECESSITY[r.category]||"want", nec => { r.necessity=nec; });
   const itemsEl = body.querySelector("#itemsList");
   if (itemsEl) renderItemNecToggles(itemsEl, r.items);
-  const dbgEl = body.querySelector("#debugOcr");
-  if (dbgEl) dbgEl.textContent = "v5(threshold=85) · raw OCR: " + (r._rawText || "(none)");
   body.querySelector("#saveTxBtn").onclick = async ()=>{
     const merchant = body.querySelector("#fMerchant").value.trim() || "Unknown";
     const amount = Math.round(Math.abs(Number(body.querySelector("#fAmount").value)||0)*100)/100;
