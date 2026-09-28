@@ -149,6 +149,46 @@
     margin: 0 auto; padding: 20px 20px calc(24px + env(safe-area-inset-bottom,0px)); max-height: 82vh; overflow-y: auto; }
   .modal-sheet h3 { margin-bottom: 14px; }
   .hidden { display: none !important; }
+
+  /* Necessity color tokens */
+  :root { --nec-essential:#8AAE8C; --nec-want:#C0A24C; --nec-junk:#C06B4C; }
+
+  /* Home segmented bar */
+  .necessity-bar-track { display:flex; gap:2px; height:8px; border-radius:4px; background:var(--line); overflow:hidden; margin:8px 0 14px; }
+  .necessity-bar-seg { height:100%; transition:width .3s; }
+  .necessity-essential { background:var(--nec-essential); }
+  .necessity-want      { background:var(--nec-want); }
+  .necessity-junk      { background:var(--nec-junk); }
+
+  /* Three-stat row */
+  .necessity-stats { display:flex; margin-bottom:4px; }
+  .necessity-stat { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 4px; }
+  .necessity-stat-label { font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.02em; }
+  .necessity-stat-amt { font-family:var(--font-mono); font-size:13.5px; font-weight:700; }
+
+  /* Necessity dot in tx-meta */
+  .nec-badge { font-size:7px; vertical-align:middle; margin-left:3px; }
+  .nec-badge.nec-essential { color:var(--nec-essential); }
+  .nec-badge.nec-junk      { color:var(--nec-junk); }
+
+  /* OCR source badge in tx-meta */
+  .ocr-badge { font-size:10px; color:var(--text-faint); margin-left:4px; vertical-align:middle; }
+
+  /* Necessity chip row (3-option: Essential / Want / Junk) */
+  .nec-chip-btn { padding:8px 13px; border-radius:20px; border:1px solid var(--line); background:var(--ink-raised); color:var(--text-dim); font-size:13px; }
+  .nec-chip-btn.sel-essential { border-color:var(--nec-essential); color:var(--nec-essential); background:rgba(138,174,140,.13); }
+  .nec-chip-btn.sel-want      { border-color:var(--nec-want);      color:var(--nec-want);      background:rgba(192,162,76,.13); }
+  .nec-chip-btn.sel-junk      { border-color:var(--nec-junk);      color:var(--nec-junk);      background:rgba(192,107,76,.13); }
+
+  /* Item rows (scan review + edit modal) */
+  .item-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); }
+  .item-row:last-child { border-bottom:none; }
+  .item-name { flex:1; font-size:13px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .item-nec-toggle { display:flex; gap:4px; flex-shrink:0; }
+  .nec-mini-btn { padding:4px 8px; border-radius:6px; border:1px solid var(--line); background:var(--ink); color:var(--text-faint); font-size:11px; font-weight:700; min-width:24px; text-align:center; }
+  .nec-mini-btn.sel-essential { background:var(--nec-essential); color:#0E1210; border-color:var(--nec-essential); }
+  .nec-mini-btn.sel-want      { background:var(--nec-want);      color:#0E1210; border-color:var(--nec-want); }
+  .nec-mini-btn.sel-junk      { background:var(--nec-junk);      color:#0E1210; border-color:var(--nec-junk); }
 </style>
 </head>
 <body>
