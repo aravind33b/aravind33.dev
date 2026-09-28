@@ -40,7 +40,7 @@ const JUNK_FOOD_RE = new RegExp(
 );
 const DETAIL_RETENTION_MONTHS = 6;
 const ROLLUP_RETENTION_MONTHS = 24;
-const OCR_CONFIDENCE_THRESHOLD = 65; // below this mean confidence, fall back to GPT-4o-mini
+const OCR_CONFIDENCE_THRESHOLD = 85; // below this mean confidence, fall back to GPT-4o-mini
 const OPENAI_MODEL = "gpt-4o-mini";
 
 const SEED_MERCHANTS = {
