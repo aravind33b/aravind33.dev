@@ -656,79 +656,60 @@ function renderScanBody(body){
 async function handleScanFile(file, body){
   const url = URL.createObjectURL(file);
   body.innerHTML = h`<img class="preview-img" src="${url}" />
-    <div class="status-line"><div class="spinner"></div><span id="statusText">Reading receipt on-device…</span></div>
+    <div class="status-line"><div class="spinner"></div><span id="statusText">Reading receipt…</span></div>
     <div class="progress-track"><div class="progress-fill" id="progFill" style="width:0%"></div></div>`;
   const progFill = body.querySelector("#progFill");
   const statusText = body.querySelector("#statusText");
+
+  // API key set: go straight to GPT, skip on-device OCR
+  if (S.apiKey) {
+    statusText.textContent = "Sending to GPT-4o-mini…";
+    progFill.style.width = "100%";
+    try {
+      const result = await runOpenAIOCR(file, S.merchants);
+      const merchant = String(result.merchant || "Unknown").trim();
+      const mNorm = normMerchant(merchant);
+      const dictHit = lookupCategory(mNorm, "");
+      finishScan(body, url, {
+        merchant, merchantNorm: mNorm,
+        dateISO: /^\d{4}-\d{2}-\d{2}$/.test(result.date) ? result.date : todayISO(),
+        amount: Math.round(Math.abs(Number(result.total)||0)*100)/100,
+        category: dictHit.cat || (CAT_MAP[result.category] ? result.category : "other"),
+        items: Array.isArray(result.items) ? result.items.slice(0,10).map(i => typeof i==="string" ? {name:i,necessity:tagItemNecessity(i)} : i) : [],
+        necessity: typeof result.necessity==="string" ? result.necessity : CAT_NECESSITY[result.category]||"want",
+        ocrSource: "gpt", confidence: null, _hasApiKey: true,
+      });
+    } catch(e) {
+      const msg = e.code === "api_error" ? "API error: " + esc(e.message) : "GPT-4o-mini couldn't read that receipt.";
+      body.innerHTML += `<div class="ai-note warn"><b>${msg}</b></div>`;
+      finishScan(body, url, { merchant:"", merchantNorm:"", dateISO:todayISO(), amount:0,
+        category:"other", items:[], necessity:"want", ocrSource:"gpt", confidence:null, _hasApiKey:true });
+    }
+    return;
+  }
+
+  // No API key: use on-device Tesseract
+  statusText.textContent = "Reading receipt on-device…";
   let local;
   try {
     local = await runLocalOCR(file, (p)=>{ progFill.style.width = Math.round(p*100)+"%"; });
   } catch(e) {
-    local = { confidence: 0, text: "", merchant: "", total: null, dateISO: null };
+    local = { confidence: 0, text: "", merchant: "", total: null, dateISO: null, items: [] };
   }
   const mNorm = normMerchant(local.merchant);
   const dictHit = lookupCategory(mNorm, local.text);
-  // With an API key, always use GPT — better merchant name, date, items.
-  // Without one, fall back only when on-device confidence is low.
-  const needsFallback = !!S.apiKey || local.confidence < OCR_CONFIDENCE_THRESHOLD || !local.merchant || local.total === null;
-
-  if (!needsFallback) {
-    finishScan(body, url, {
-      merchant: local.merchant, merchantNorm: mNorm,
-      dateISO: local.dateISO || todayISO(),
-      amount: Math.round(Math.abs(local.total)*100)/100,
-      category: dictHit.cat || "other",
-      items: local.items || [], via: dictHit.cat ? dictHit.via : "unmatched",
-      necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
-      ocrSource: "on-device", confidence: Math.round(local.confidence),
-      _hasApiKey: !!S.apiKey,
-    });
-    return;
+  const lowConf = local.confidence < OCR_CONFIDENCE_THRESHOLD || !local.merchant || local.total === null;
+  if (lowConf) {
+    body.innerHTML += h`<div class="ai-note warn"><b>Low confidence (${Math.round(local.confidence)}%).</b> Add an OpenAI API key in Settings for better results.</div>`;
   }
-
-  statusText.textContent = `On-device reading wasn't confident (${Math.round(local.confidence)}%)…`;
-  if (!S.apiKey) {
-    body.innerHTML += h`<div class="ai-note warn"><b>Low confidence, no fallback available.</b> Add an OpenAI API key in Settings to enable the AI fallback, or fix the fields below yourself.</div>`;
-    finishScan(body, url, {
-      merchant: local.merchant || "", merchantNorm: mNorm,
-      dateISO: local.dateISO || todayISO(),
-      amount: local.total ? Math.round(Math.abs(local.total)*100)/100 : 0,
-      category: dictHit.cat || "other", items: local.items || [], via: "manual-fix-needed",
-      necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
-      ocrSource: "on-device (low confidence)", confidence: Math.round(local.confidence),
-      _hasApiKey: false,
-    });
-    return;
-  }
-  statusText.textContent = "Asking GPT-4o-mini to read it instead…";
-  progFill.style.width = "100%";
-  try {
-    const result = await runOpenAIOCR(file, S.merchants);
-    const merchant = String(result.merchant || "Unknown").trim();
-    const mNorm2 = normMerchant(merchant);
-    const dictHit2 = lookupCategory(mNorm2, "");
-    finishScan(body, url, {
-      merchant, merchantNorm: mNorm2,
-      dateISO: /^\d{4}-\d{2}-\d{2}$/.test(result.date) ? result.date : todayISO(),
-      amount: Math.round(Math.abs(Number(result.total)||0)*100)/100,
-      category: dictHit2.cat || CAT_MAP[result.category] ? (dictHit2.cat || result.category) : "other",
-      items: Array.isArray(result.items) ? result.items.slice(0,6).map(i => typeof i==="string" ? {name:i, necessity:tagItemNecessity(i)} : i) : [],
-      necessity: typeof result.necessity==="string" ? result.necessity : CAT_NECESSITY[result.category]||"want",
-      via: dictHit2.cat ? dictHit2.via : "ai", ocrSource: "gpt", confidence: null,
-    });
-  } catch(e) {
-    let msg = "GPT-4o-mini couldn't read that receipt either.";
-    if (e.code === "api_error") msg = "API error: " + esc(e.message);
-    body.innerHTML += `<div class="ai-note warn"><b>${msg}</b></div>`;
-    finishScan(body, url, {
-      merchant: local.merchant || "", merchantNorm: mNorm,
-      dateISO: local.dateISO || todayISO(),
-      amount: local.total ? Math.round(Math.abs(local.total)*100)/100 : 0,
-      category: dictHit.cat || "other", items: local.items || [], via: "manual-fix-needed",
-      necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
-      ocrSource: "on-device (low confidence)", confidence: Math.round(local.confidence),
-    });
-  }
+  finishScan(body, url, {
+    merchant: local.merchant || "", merchantNorm: mNorm,
+    dateISO: local.dateISO || todayISO(),
+    amount: local.total ? Math.round(Math.abs(local.total)*100)/100 : 0,
+    category: dictHit.cat || "other", items: local.items || [],
+    necessity: CAT_NECESSITY[dictHit.cat || "other"] || "want",
+    ocrSource: "on-device", confidence: Math.round(local.confidence), _hasApiKey: false,
+  });
 }
 function finishScan(body, imgUrl, r){
   const sourceNote = r.ocrSource === "gpt"
