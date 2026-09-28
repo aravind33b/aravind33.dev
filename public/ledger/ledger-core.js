@@ -320,7 +320,7 @@ async function runOpenAIOCR(file, knownMerchants){
   const base64 = await fileToBase64(file);
   const catIds = CATEGORIES.map(c=>c.id).join(", ");
   const prompt = `You are reading a photo of a purchase receipt. Reply with ONLY a JSON object:
-{"merchant":string,"date":"YYYY-MM-DD","total":number,"category":one of [${catIds}],"necessity":"essential"|"want"|"junk","items":[{"name":string,"necessity":"essential"|"want"|"junk"},...up to 10]}
+{"merchant":string,"date":"YYYY-MM-DD","total":number,"category":one of [${catIds}],"necessity":"essential"|"want"|"junk","items":[{"name":string,"price":number,"necessity":"essential"|"want"|"junk"},...up to 10]}
 Necessity: essential=unavoidable (utilities, staple food, medicine, transport to work); want=reasonable but optional (dining, coffee, subscriptions, gym); junk=impulse/wasteful (junk food, snacks, alcohol, splurge entertainment). Apply per item based on what the item actually is. Known merchants: ${JSON.stringify(knownMerchants)}. Today: ${todayISO()}.`;
   const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -396,7 +396,8 @@ function renderItemNecToggles(containerEl, items){
   containerEl.innerHTML = "";
   items.forEach((item, idx) => {
     const row = document.createElement("div"); row.className="item-row";
-    const nameEl = document.createElement("span"); nameEl.className="item-name"; nameEl.textContent=item.name;
+    const nameEl = document.createElement("span"); nameEl.className="item-name";
+    nameEl.textContent = item.name + (item.price > 0 ? `  $${item.price.toFixed(2)}` : "");
     const toggle = document.createElement("div"); toggle.className="item-nec-toggle";
     ["E","W","J"].forEach((label,i) => {
       const nec = ["essential","want","junk"][i];
@@ -506,8 +507,31 @@ function renderHome(){
   const sortedCats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
   const necTotals = {essential:0, want:0, junk:0};
   monthTx.forEach(t => {
-    const n = t.necessity || CAT_NECESSITY[t.category] || "want";
-    necTotals[n] = Math.round((necTotals[n]+t.amount)*100)/100;
+    const items = t.items || [];
+    const pricedItems = items.filter(i => i.price > 0);
+    if (pricedItems.length > 0) {
+      // split by item prices; remainder (tax etc.) inherits transaction necessity
+      const itemSum = pricedItems.reduce((s, i) => s + i.price, 0);
+      pricedItems.forEach(i => {
+        const n = i.necessity || "want";
+        necTotals[n] = Math.round((necTotals[n] + i.price) * 100) / 100;
+      });
+      const remainder = Math.round((t.amount - itemSum) * 100) / 100;
+      if (remainder > 0) {
+        const n = t.necessity || CAT_NECESSITY[t.category] || "want";
+        necTotals[n] = Math.round((necTotals[n] + remainder) * 100) / 100;
+      }
+    } else if (items.length > 0) {
+      // no prices — split equally among items by necessity
+      const share = Math.round(t.amount / items.length * 100) / 100;
+      items.forEach(i => {
+        const n = i.necessity || "want";
+        necTotals[n] = Math.round((necTotals[n] + share) * 100) / 100;
+      });
+    } else {
+      const n = t.necessity || CAT_NECESSITY[t.category] || "want";
+      necTotals[n] = Math.round((necTotals[n] + t.amount) * 100) / 100;
+    }
   });
   const necGrand = necTotals.essential+necTotals.want+necTotals.junk;
   const necPct = k => necGrand>0 ? Math.round((necTotals[k]/necGrand)*100) : 0;
